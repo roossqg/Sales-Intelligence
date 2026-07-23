@@ -59,6 +59,7 @@ price = input('Change_by: ')
 quantity = input('Change_by: ')
 date = input('Change_by: ')
 category = input('Change_by: ')
+age = input('Change_by: ')
 
 
 data.rename(
@@ -66,12 +67,13 @@ data.rename(
                     price:'price',
                     quantity:'quantity',
                     date:'date',
-                    category:'category'},
+                    category:'category',
+                    age:'age'},
                     inplace=True)
 
 
-data = data[['client_id','price','quantity','date','category']]
-print(data)
+data = data[['client_id','price','quantity','date','category','age']]
+data.to_csv('sales.csv')
 #save in local db
 
 

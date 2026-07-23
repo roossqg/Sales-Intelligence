@@ -2,6 +2,9 @@
 Fastapi/
 .venv
 .vscode
+test_data.ipynb
+sales.csv
+.env
 
 poetry.lock
 pyproject.toml
