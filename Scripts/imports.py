@@ -72,8 +72,7 @@ data.rename(
                     inplace=True)
 
 
-data = data[['client_id','price','quantity','date','category','age']]
+data = data[['client_id','price','quantity','datetime','category','age']]
 data.to_csv('sales.csv')
 #save in local db
-
 

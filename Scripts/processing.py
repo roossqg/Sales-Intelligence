@@ -6,6 +6,20 @@ from sklearn.ensemble import RandomForestClassifier
 data = pd.read_csv('sales.csv')
 
 
+def datetime_numbers(data,target_col = 'datetime'):
+
+    data[target_col] = data[target_col].astype('datetime')
+
+    data['Year'] = data['datetime'].dt.year
+    data['Month'] = data['datetime'].dt.month
+    data['Day'] = data['datetime'].dt.day
+    data['Day_of_week'] = data['datetime'].dt.dayofweek
+
+    data = data.drop(columns=[target_col])
+
+    return data
+
+
 def input_category(data,target_col = 'category'):
 
     predict_y_set = data[data[target_col].isna()] # data for input
@@ -23,22 +37,7 @@ def input_category(data,target_col = 'category'):
     #fill
     data.loc[data[target_col].isna(),target_col] = inputer.predict(predict_y_set)
         
-    return data
-
    ## limit train set size for small training times,log loss for num features
-
-
-def datetime_numbers(data,target_col = 'datetime'):
-
-    data[target_col] = data[target_col].astype('datetime')
-
-    data['Year'] = data['datetime'].dt.year
-    data['Month'] = data['datetime'].dt.month
-    data['Day'] = data['datetime'].dt.day
-    data['Day_of_week'] = data['datetime'].dt.dayofweek
-
-    data = data.drop(columns=[target_col])
-
     return data
 
 
@@ -62,29 +61,6 @@ def input_missing_vals_data(data):
     return data
 
 
-def convert_data(data):
-
-    for col in data.columns:
-
-        if col in ['age','quantity','price','client_id']:
-            data[col] = data[col].astype(int)
-
-        if col == 'datetime':
-            data[col] = pd.to_datetime(data[col],format='%Y-%m-%d : %H')
-
-
-        if col == 'category':
-            data[col] = data[col].astype('category')
-
-        
-        categories_age = pd.cut(data['age'],bins=[0,18,25,32,45,55,65,np.inf],
-            labels=['-18','18-25','25-32','32-45','45-55','55-65','65+'])
-        
-        data['age_range'] = categories_age
-
-    return data
-
-
 def standardize_data(data,col):
 
     #1.clean all irregular chars
@@ -99,7 +75,38 @@ def standardize_data(data,col):
 
     return data[col]
 
+
+def convert_data(data):
+
+    for col in data.columns:
+
+
+        if col in ['age','quantity','price','client_id']:
+            data[col] = standardize_data(data,col)
+            data[col] = data[col].astype(int)
+
+        if col == 'datetime':
+            data[col] = pd.to_datetime(data[col],format='%Y-%m-%d : %H')
+
+
+        elif col == 'category':
+            data[col] = data[col].str.lower()
+            data[col] = standardize_data(data,col)
+            data[col] = data[col].astype('category')
+
+        else:
+            pass
+
         
+    categories_age = pd.cut(data['age'],bins=[0,18,25,32,45,55,65,np.inf],
+        labels=['-18','18-25','25-32','32-45','45-55','55-65','65+'])
+    
+    data['age_range'] = categories_age
+
+    return data
+
+
+input_missing_vals_data(convert_data(data)).to_csv('clean_sales.csv')
     
 #order :
 #standarlize(convert()) -> datetime -> inp_cat(datetime) -> miss(inp_cat))
