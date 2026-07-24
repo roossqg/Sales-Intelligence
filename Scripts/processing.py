@@ -8,12 +8,12 @@ data = pd.read_csv('sales.csv')
 
 def datetime_numbers(data,target_col = 'datetime'):
 
-    data[target_col] = data[target_col].astype('datetime')
+    data[target_col] =  pd.to_datetime(data[target_col],format='%Y-%m-%d : %H')
 
-    data['Year'] = data['datetime'].dt.year
-    data['Month'] = data['datetime'].dt.month
-    data['Day'] = data['datetime'].dt.day
-    data['Day_of_week'] = data['datetime'].dt.dayofweek
+    data['Year'] = data[target_col].dt.year
+    data['Month'] = data[target_col].dt.month
+    data['Day'] = data[target_col].dt.day
+    data['Day_of_week'] = data[target_col].dt.dayofweek
 
     data = data.drop(columns=[target_col])
 
@@ -22,26 +22,26 @@ def datetime_numbers(data,target_col = 'datetime'):
 
 def input_category(data,target_col = 'category'):
 
-    predict_y_set = data[data[target_col].isna()] # data for input
 
-    features = [col for col in data.columns if col != target_col]
+    features = ['client_id','age','quantity','price']
 
-    train_x_set = data[data[features].notna()] # clean features
-    train_y_set = data[data[target_col].notna()] # clean target
+    non_null = data[data[features].notna()]
+    null_target = data[data[target_col].isna()]
 
-    train_x_set = datetime_numbers(train_x_set) # get numbers dataframe
+    train_x_set = non_null[features]
+    train_y_set = non_null[target_col]
 
+    predict_y_set = null_target[features]
+    
     inputer = RandomForestClassifier(n_estimators=200,max_samples=300,criterion='log_loss')
     inputer.fit(train_x_set,train_y_set)
 
-    #fill
     data.loc[data[target_col].isna(),target_col] = inputer.predict(predict_y_set)
-        
+  
    ## limit train set size for small training times,log loss for num features
     return data
 
 
-#conceptual input
 def input_missing_vals_data(data):
 
     inputs = {
@@ -51,7 +51,6 @@ def input_missing_vals_data(data):
 
     #random forest in no null values
     data = input_category(data)
-
     data.fillna(values=inputs,inplace=True) # -> input null features
 
     #after input cats
@@ -63,11 +62,6 @@ def input_missing_vals_data(data):
 
 def standardize_data(data,col):
 
-    #1.clean all irregular chars
-    #2.clear all blank spaces for ' '
-    #3.remove incosistent cats
-
-    #blank sp
     data[col] = data[col].str.strip()
     data[col] = data[col].str.replace(r's+',' ',regex=True)
     #irr chars
@@ -85,9 +79,8 @@ def convert_data(data):
             data[col] = standardize_data(data,col)
             data[col] = data[col].astype(int)
 
-        if col == 'datetime':
-            data[col] = pd.to_datetime(data[col],format='%Y-%m-%d : %H')
-
+        elif col == 'datetime':
+            data[col] = pd.to_datetime(data[col],errors='coerce',format='%Y-%m-%d')
 
         elif col == 'category':
             data[col] = data[col].str.lower()
@@ -106,7 +99,7 @@ def convert_data(data):
     return data
 
 
-input_missing_vals_data(convert_data(data)).to_csv('clean_sales.csv')
+#data = input_missing_vals_data(convert_data(data)).to_csv('clean_sales.csv')
     
 #order :
 #standarlize(convert()) -> datetime -> inp_cat(datetime) -> miss(inp_cat))

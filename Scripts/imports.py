@@ -4,6 +4,7 @@ from functools import partial
 from data_classes import DataLoadError
 
 from sqlalchemy import create_engine
+import sqlite3
 
 #select formats: []
 
@@ -72,7 +73,24 @@ data.rename(
                     inplace=True)
 
 
-data = data[['client_id','price','quantity','datetime','category','age']]
+#data = data[['client_id','price','quantity','datetime','category','age']]
+
+#test:
+data = pd.DataFrame({
+    'client_id':[1,2,3,4,5],
+    'price': [22.3,555,23,67,1000],
+    'quantity':[2,4,7,20,1000],
+    'datetime':['2013-02-10','2013-02-11','2013-02-10','2013-02-16','2013-04-10'],
+    'category':['sports','','sports','','games'],
+    'age':[22,34,19,87,27]
+})
+
 data.to_csv('sales.csv')
+#def save_db(data,db='my_database',table='sales.csv',if_exists='replace'):
+    #with sqlite3.connect(db) as database:
+        #data.to_sql(table,database,if_exists=if_exists)
+ 
+#save_db(data)
+
 #save in local db
 
