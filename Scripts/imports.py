@@ -57,7 +57,7 @@ data = load_data('csv','synthetic_credit_dataset.csv')
 client_id = input('Change_by: ')
 price = input('Change_by: ')
 quantity = input('Change_by: ')
-date = input('Change_by: ')
+datetime = input('Change_by: ')
 category = input('Change_by: ')
 age = input('Change_by: ')
 
@@ -66,7 +66,7 @@ data.rename(
     columns={client_id :'client_id',
                     price:'price',
                     quantity:'quantity',
-                    date:'date',
+                    datetime:'datetime',
                     category:'category',
                     age:'age'},
                     inplace=True)
