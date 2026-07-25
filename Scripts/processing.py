@@ -8,35 +8,37 @@ data = pd.read_csv('sales.csv')
 
 def datetime_numbers(data,target_col = 'datetime'):
 
-    data[target_col] =  pd.to_datetime(data[target_col],format='%Y-%m-%d : %H')
+    data[target_col] =  pd.to_datetime(data[target_col])
 
     data['Year'] = data[target_col].dt.year
     data['Month'] = data[target_col].dt.month
     data['Day'] = data[target_col].dt.day
     data['Day_of_week'] = data[target_col].dt.dayofweek
 
-    data = data.drop(columns=[target_col])
+    #data = data.drop(columns=[target_col])
 
     return data
 
 
 def input_category(data,target_col = 'category'):
 
+    df = data.drop(columns=['datetime'])
+    features = [col for col in df.columns if col != target_col]
+    
+    non_null_df = df[df[target_col].notna()]
+    null_df = df[df[target_col].isna()]
+    
+    if null_df.empty:
+        return df
+    
+    X_train = non_null_df[features]
+    y_train = non_null_df[target_col]
 
-    features = ['client_id','age','quantity','price']
-
-    non_null = data[data[features].notna()]
-    null_target = data[data[target_col].isna()]
-
-    train_x_set = non_null[features]
-    train_y_set = non_null[target_col]
-
-    predict_y_set = null_target[features]
+    X_pred = null_df[features]
     
     inputer = RandomForestClassifier(n_estimators=200,max_samples=300,criterion='log_loss')
-    inputer.fit(train_x_set,train_y_set)
-
-    data.loc[data[target_col].isna(),target_col] = inputer.predict(predict_y_set)
+    inputer.fit(X_train,y_train)
+    data.loc[data[target_col].isna(),target_col] = inputer.predict(X_pred)
   
    ## limit train set size for small training times,log loss for num features
     return data
@@ -51,7 +53,7 @@ def input_missing_vals_data(data):
 
     #random forest in no null values
     data = input_category(data)
-    data.fillna(values=inputs,inplace=True) # -> input null features
+    data.fillna(value=inputs,inplace=True) # -> input null features
 
     #after input cats
     data[['price','quantity']] = data.groupby('category')[['price','quantity']].transform(
@@ -73,22 +75,15 @@ def standardize_data(data,col):
 def convert_data(data):
 
     for col in data.columns:
-
-
         if col in ['age','quantity','price','client_id']:
-            data[col] = standardize_data(data,col)
             data[col] = data[col].astype(int)
 
-        elif col == 'datetime':
-            data[col] = pd.to_datetime(data[col],errors='coerce',format='%Y-%m-%d')
 
-        elif col == 'category':
-            data[col] = data[col].str.lower()
-            data[col] = standardize_data(data,col)
-            data[col] = data[col].astype('category')
-
-        else:
-            pass
+    data['datetime'] = pd.to_datetime(data['datetime'],errors='coerce',format='%Y-%m')
+    
+    data['category'] = data['category'].str.lower()
+    data['category'] = standardize_data(data,'category')
+    data['category'] = data['category'].astype('category')
 
         
     categories_age = pd.cut(data['age'],bins=[0,18,25,32,45,55,65,np.inf],
@@ -121,8 +116,17 @@ def convert_data(data):
 #future:
 #transaction_id : data inputs
 
-
-
+print(convert_data(input_missing_vals_data(datetime_numbers(data))).dtypes)
 
 
 ##sqlite
+#features_plus_tg = ['client_id','age','quantity','price',target_col]
+    #features = ['client_id','age','quantity','price']
+
+    #non_null_data = data[data[features_plus_tg].notna()]
+
+    #x_test = data[data[target_col].isna()]
+    #x_test = x_test[features]
+
+    #x_train = non_null_data[features]
+    #y_train = non_null_data[target_col]
