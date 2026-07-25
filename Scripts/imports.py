@@ -86,11 +86,4 @@ data = pd.DataFrame({
 })
 
 data.to_csv('sales.csv')
-#def save_db(data,db='my_database',table='sales.csv',if_exists='replace'):
-    #with sqlite3.connect(db) as database:
-        #data.to_sql(table,database,if_exists=if_exists)
- 
-#save_db(data)
-
-#save in local db
 
