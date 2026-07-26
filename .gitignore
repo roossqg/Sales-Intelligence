@@ -6,6 +6,8 @@ test_data.ipynb
 sales.csv
 .env
 
+*.db
+
 poetry.lock
 pyproject.toml
 
