@@ -1,4 +1,4 @@
-from database import session,Base
+from src.Models.database import session,Base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker,DeclarativeBase
 from settings import settings

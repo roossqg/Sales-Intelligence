@@ -1,12 +1,13 @@
 import pandas as pd
 from functools import partial
 
-from data_classes import DataLoadError
+from src.Models.data_classes import DataLoadError
+#import Models.data_classes
 
 from sqlalchemy import create_engine
 import sqlite3
 
-#select formats: []
+#i = Models.data_classes.DataLoadError
 
 input_format = input('define you file type: ')
 
@@ -49,31 +50,32 @@ def load_data(input_format:str,input_data:str,**kwargs) -> pd.DataFrame:
 
     return data
 
-    
-data = load_data('csv','synthetic_credit_dataset.csv')
-##==================data formating===========================
 
-#select cols to pattern: clients needs to be know
+def rename_columns(data,client_id:str,
+                   price:str,quantity:str,datetime:str,category:str,age:str,product_name:str):
 
-client_id = input('Change_by: ')
-price = input('Change_by: ')
-quantity = input('Change_by: ')
-datetime = input('Change_by: ')
-category = input('Change_by: ')
-age = input('Change_by: ')
+    data.rename(
+        columns={client_id :'client_id',
+                 product_name: 'product_name',
+                        price:'price',
+                        quantity:'quantity',
+                        datetime:'datetime',
+                        category:'category',
+                        age:'age'},
+                        inplace=True)
 
+    data = data[['client_id','product_name','price','quantity','category','age','datetime']]
 
-data.rename(
-    columns={client_id :'client_id',
-                    price:'price',
-                    quantity:'quantity',
-                    datetime:'datetime',
-                    category:'category',
-                    age:'age'},
-                    inplace=True)
+    return data
 
 
-#data = data[['client_id','price','quantity','datetime','category','age']]
+def import_data(file_type,file_path):
+
+    data = load_data(file_type,file_path)
+    data = rename_columns(data,'client_id','price','quantity','datetime','category','age','product_name')
+
+    return data
+
 
 #test:
 data = pd.DataFrame({
@@ -82,7 +84,8 @@ data = pd.DataFrame({
     'quantity':[2,4,7,20,1000],
     'datetime':['2013-02-10','2013-02-11','2013-02-10','2013-02-16','2013-04-10'],
     'category':['sports','','sports','','games'],
-    'age':[22,34,19,87,27]
+    'age':[22,34,19,87,27],
+    'product_name': ['ball','plane','boil','ball','book']
 })
 
 data.to_csv('sales.csv')

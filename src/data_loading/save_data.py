@@ -1,8 +1,8 @@
 import pandas as pd
 
 from database import session,sales
-from processing import main
-from imports import load_data
+from src.data_loading.processing import main
+from src.data_loading.imports import load_data
 from sqlalchemy.orm import Session
 
 
