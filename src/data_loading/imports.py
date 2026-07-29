@@ -1,7 +1,7 @@
 import pandas as pd
 from functools import partial
 
-from src.Models.data_classes import DataLoadError
+#from src.Models.data_classes import DataLoadError
 #import Models.data_classes
 
 from sqlalchemy import create_engine
