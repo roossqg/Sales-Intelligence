@@ -1,7 +1,7 @@
 import pandas as pd
 from functools import partial
 
-#from src.Models.data_classes import DataLoadError
+from data_loading.data_classes import DataLoadError
 #import Models.data_classes
 
 from sqlalchemy import create_engine
@@ -56,7 +56,7 @@ def rename_columns(data,client_id:str,
 
     data.rename(
         columns={client_id :'client_id',
-                 product_name: 'product_name',
+                 #product_name: 'product_name',
                         price:'price',
                         quantity:'quantity',
                         datetime:'datetime',
@@ -64,7 +64,7 @@ def rename_columns(data,client_id:str,
                         age:'age'},
                         inplace=True)
 
-    data = data[['client_id','product_name','price','quantity','category','age','datetime']]
+    data = data[['client_id','price','quantity','category','age','datetime','product_name']]
 
     return data
 
@@ -73,6 +73,7 @@ def import_data(file_type,file_path):
 
     data = load_data(file_type,file_path)
     data = rename_columns(data,'client_id','price','quantity','datetime','category','age','product_name')
+    data = data[['client_id','price','quantity','datetime','category','age','product_name']]
 
     return data
 
@@ -87,6 +88,5 @@ data = pd.DataFrame({
     'age':[22,34,19,87,27],
     'product_name': ['ball','plane','boil','ball','book']
 })
-
-data.to_csv('sales.csv')
-
+data = data[['client_id','price','quantity','datetime','category','age','product_name']]
+data.to_csv('sales.csv',index=False)

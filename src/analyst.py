@@ -1,27 +1,14 @@
-#from load_data import export_sql_to_csv
-
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib
 import seaborn as sns
 import plotly.express as px
+import streamlit as st
+from data_loading.imports import import_data
+from data_loading.processing import process
+from data_loading.data_classes import DataLoadError
 
 matplotlib.use('QtAgg')
-
-import streamlit as st
-
-#data = export_sql_to_csv()
-data = pd.read_csv('sales.csv')
-
-######## most sale cat
-
-
-#st.title("📊 Sales per Sector")
-#fig = px.bar(data, y="category", x="quantity", orientation="h")
-#st.plotly_chart(fig, use_container_width=True)
-
-
-## sale pr per sector
 
 
 st.set_page_config(
@@ -29,6 +16,7 @@ st.set_page_config(
     page_icon="📊",
     layout="wide",
 )
+
 
 age_bins = [0, 18, 25, 35, 45, 55, 65, 120]
 age_labels = ["<18", "18-24", "25-34", "35-44", "45-54", "55-64", "65+"]
@@ -47,10 +35,6 @@ def load_data(data) -> pd.DataFrame:
     df["week"] = df["datetime"].dt.to_period("W").astype(str)
     df["weekday"] = df["datetime"].dt.day_name()
     df["hour"] = df["datetime"].dt.hour
- 
-    df["age_range"] = pd.cut(
-        df["age"], bins=age_bins, labels=age_labels, right=False
-    )
  
     return df
 
@@ -110,8 +94,6 @@ def show_kpis(df: pd.DataFrame):
     col4.metric("🧾 Mean Ticket (ATV)", f"R$ {mean_ticket:,.2f}")
     col5.metric("🏷️ Mean Price", f"R$ {mean_price:,.2f}")
 
-## linegraph with sales per month
-
 
 def ghp_revenue_time(df: pd.DataFrame, granunality: str = "date"):
     revenue = df.groupby(granunality, as_index=False)["revenue"].sum()
@@ -148,6 +130,7 @@ def ghp_top_products(df: pd.DataFrame, top_n: int = 10):
     fig.update_layout(yaxis={"categoryorder": "total ascending"})
     return fig
 
+
 def ghp_participation_per_category(df: pd.DataFrame):
     cat = df.groupby("category", as_index=False)["revenue"].sum()
     fig = px.pie(
@@ -161,6 +144,7 @@ def ghp_participation_per_category(df: pd.DataFrame):
     fig.update_traces(textinfo="percent+label")
     return fig
 
+
 def ghp_dist_clients_by_age(df: pd.DataFrame):
     dist = df.drop_duplicates("client_id").groupby("age_range", as_index=False).size()
     fig = px.bar(
@@ -172,6 +156,7 @@ def ghp_dist_clients_by_age(df: pd.DataFrame):
         color_discrete_sequence=PAllET,
         )
     return fig
+
 
 def ghp_seazonality(df: pd.DataFrame):
     days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
@@ -193,6 +178,7 @@ def ghp_seazonality(df: pd.DataFrame):
     )
     return fig
 
+
 def ghp_top_clients(df: pd.DataFrame, top_n: int = 10):
     top = (
         df.groupby("client_id", as_index=False)["revenue"]
@@ -211,6 +197,7 @@ def ghp_top_clients(df: pd.DataFrame, top_n: int = 10):
         color_continuous_scale="Greens",
     )
     return fig
+
 
 def ghp_frequency_sale(df: pd.DataFrame):
    
@@ -235,6 +222,7 @@ def ghp_frequency_sale(df: pd.DataFrame):
 
     return fig
 
+
 def ghp_qtd_per_category_time(df: pd.DataFrame, granularity: str = "month"):
     agg = df.groupby([granularity, "category"], as_index=False)["quantity"].sum()
     fig = px.area(
@@ -253,9 +241,12 @@ def main():
     st.title("📊 Sales Dashboard")
     st.caption("Filter Data in side bar.graphs are generated automatically")
 
-    data = pd.read_csv('sales.csv')
-    data = load_data(data)
-    df = apply_filters(data)
+    data_imported = import_data('csv','sales.csv')
+    data_preproccessed = process(data_imported)
+    data_datetime = load_data(data_preproccessed)
+    
+    df = apply_filters(data_datetime)
+    
  
     if df.empty:
         st.warning("None Filter for selected data.")
@@ -264,20 +255,20 @@ def main():
     show_kpis(df)
     st.divider()
  
-    aba1, aba2, aba3, aba4 = st.tabs(
+    tab1, tab2, tab3, tab4 = st.tabs(
         ["📈 General", "🛒 Products & Categories", "👥 Clients", "🕒 Seazonality"]
     )
  
-    # ---- ABA 1: Visão Geral ----
-    with aba1:
+    
+    with tab1:
         granularity = st.radio(
             "Group revenue by:", ["date", "week", "month"], horizontal=True, index=2
         )
         st.plotly_chart(ghp_revenue_time(df, granularity), use_container_width=True)
         st.plotly_chart(ghp_qtd_per_category_time(df, "month"), use_container_width=True)
  
-    # ---- ABA 2: Produtos & Categorias ----
-    with aba2:
+    
+    with tab2:
         col_a, col_b = st.columns(2)
         with col_a:
             top_n = st.slider("How products show?", 5, 20, 10)
@@ -285,8 +276,8 @@ def main():
         with col_b:
             st.plotly_chart(ghp_participation_per_category(df), use_container_width=True)
  
-    # ---- ABA 3: Clientes ----
-    with aba3:
+    
+    with tab3:
         col_a, col_b = st.columns(2)
         with col_a:
             st.plotly_chart(ghp_dist_clients_by_age(df), use_container_width=True)
@@ -295,8 +286,8 @@ def main():
         st.plotly_chart(ghp_top_clients(df, top_n_clientes), use_container_width=True)
         #st.plotly_chart(ghp_frequency_sale, use_container_width=True)
  
-    # ---- ABA 4: Sazonalidade ----
-    with aba4:
+  
+    with tab4:
         st.plotly_chart(ghp_seazonality(df), use_container_width=True)
  
  

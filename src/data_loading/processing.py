@@ -3,8 +3,6 @@ import numpy as np
 
 from sklearn.ensemble import RandomForestClassifier
 
-data = pd.read_csv('sales.csv')
-
 
 def datetime_numbers(data,target_col = 'datetime'):
     '''create num columns from datetime to use in random forest'''
@@ -24,7 +22,7 @@ def input_missing_category(data,target_col = 'category'):
 
     data = datetime_numbers(data)
 
-    df = data.drop(columns=['datetime']) # we already have date numbers
+    df = data.drop(columns=['datetime','product_name']) # we already have date numbers
 
     features = [col for col in df.columns if col != target_col]
     
@@ -92,12 +90,11 @@ def convert_data(data):
         labels=['-18','18-25','25-32','32-45','45-55','55-65','65+'])
     
     data['age_range'] = categories_age
-    data = data.drop(columns=['Unnamed: 0']).reset_index(drop=True)
 
     return data
 
 
-def main(data):
+def process(data):
 
     data_clean = input_missing_values(data)
     data_converted = convert_data(data_clean)
