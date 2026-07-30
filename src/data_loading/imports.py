@@ -1,7 +1,7 @@
 import pandas as pd
 from functools import partial
 
-from data_loading.data_classes import DataLoadError
+
 #import Models.data_classes
 
 from sqlalchemy import create_engine
@@ -9,7 +9,7 @@ import sqlite3
 
 #i = Models.data_classes.DataLoadError
 
-input_format = input('define you file type: ')
+#input_format = input('define you file type: ')
 
 #if input_format == 'sql':
 #url = input()
@@ -28,7 +28,7 @@ formats = {'csv':pd.read_csv,
 def load_data(input_format:str,input_data:str,**kwargs) -> pd.DataFrame:
 
     if input_format not in formats.keys():
-        raise DataLoadError(
+        raise FileExistsError(
             f"Format : '{input_format}' not supported",
             f"Formats supported : {list(formats.keys())}"
         )
@@ -37,16 +37,16 @@ def load_data(input_format:str,input_data:str,**kwargs) -> pd.DataFrame:
         data = formats[input_format](input_data,**kwargs)
 
     except FileNotFoundError:
-        raise DataLoadError(f"File: '{input_data}' not found")
+        raise FileExistsError(f"File: '{input_data}' not found")
 
     except pd.errors.EmptyDataError:
-        raise DataLoadError(f"File: '{input_data}' is empty")
+        raise FileExistsError(f"File: '{input_data}' is empty")
 
     except Exception as e:
-        raise DataLoadError(f"Fail in read {input_data} as {input_format}: {e}") from e
+        raise FileExistsError(f"Fail in read {input_data} as {input_format}: {e}") from e
 
     if data.empty:
-        raise DataLoadError(f"Loaded Data: {input_data} are empty after load")
+        raise FileExistsError(f"Loaded Data: {input_data} are empty after load")
 
     return data
 

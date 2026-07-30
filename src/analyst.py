@@ -6,7 +6,6 @@ import plotly.express as px
 import streamlit as st
 from data_loading.imports import import_data
 from data_loading.processing import process
-from data_loading.data_classes import DataLoadError
 
 matplotlib.use('QtAgg')
 
