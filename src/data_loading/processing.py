@@ -4,7 +4,7 @@ import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 
 
-def datetime_numbers(data,target_col = 'datetime'):
+def datetime_numbers(data: pd.DataFrame,target_col: str = 'datetime') -> pd.DataFrame:
     '''create num columns from datetime to use in random forest'''
 
     data[target_col] =  pd.to_datetime(data[target_col])
@@ -17,8 +17,7 @@ def datetime_numbers(data,target_col = 'datetime'):
     return data
 
 
-## limit train set size for small training times,log loss for num features
-def input_missing_category(data,target_col = 'category'):
+def input_missing_category(data: pd.DataFrame,target_col: str = 'category') -> pd.DataFrame:
 
     data = datetime_numbers(data)
 
@@ -45,7 +44,7 @@ def input_missing_category(data,target_col = 'category'):
     return data
 
 
-def input_missing_values(data):
+def input_missing_values(data: pd.DataFrame) -> pd.DataFrame:
 
     inputs = {
         'age':data['age'].mean(),
@@ -61,7 +60,7 @@ def input_missing_values(data):
     return data
 
 
-def standardize_data(data,col):
+def standardize_data(data: pd.DataFrame,col: str) -> pd.DataFrame:
 
     data[col] = data[col].str.strip()
     data[col] = data[col].str.replace(r's+',' ',regex=True)
@@ -72,7 +71,7 @@ def standardize_data(data,col):
     return data[col]
 
 
-def convert_data(data):
+def convert_data(data: pd.DataFrame) -> pd.DataFrame:
 
     for col in data.columns:
         if col in ['age','quantity','price','client_id']:
@@ -94,15 +93,9 @@ def convert_data(data):
     return data
 
 
-def process(data):
+def process_data(data: pd.DataFrame) -> pd.DataFrame:
 
     data_clean = input_missing_values(data)
     data_converted = convert_data(data_clean)
 
     return data_converted
-
-#future:
-#transaction_id : data inputs
-
-#print(main(data))
-#corrections: std~convert funcs,

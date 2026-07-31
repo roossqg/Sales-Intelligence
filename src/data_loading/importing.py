@@ -1,34 +1,21 @@
 import pandas as pd
+
 from functools import partial
+from data_classes import DataLoadError
 
-
-#import Models.data_classes
-
-from sqlalchemy import create_engine
-import sqlite3
-
-#i = Models.data_classes.DataLoadError
-
-#input_format = input('define you file type: ')
-
-#if input_format == 'sql':
-#url = input()
-#engine = create_engine(url)
-    
 
 formats = {'csv':pd.read_csv,
            'excel':pd.read_excel,
            'parquet':pd.read_parquet,
            'tsv':partial(pd.read_csv,sep='\t'),
            'json':pd.read_json,
-           #'sql':partial(pd.read_sql,con=engine)
            }
 
 
-def load_data(input_format:str,input_data:str,**kwargs) -> pd.DataFrame:
+def load_data(input_format: str,input_data: str,**kwargs) -> pd.DataFrame:
 
     if input_format not in formats.keys():
-        raise FileExistsError(
+        raise DataLoadError(
             f"Format : '{input_format}' not supported",
             f"Formats supported : {list(formats.keys())}"
         )
@@ -36,27 +23,28 @@ def load_data(input_format:str,input_data:str,**kwargs) -> pd.DataFrame:
     try:
         data = formats[input_format](input_data,**kwargs)
 
-    except FileNotFoundError:
+    except DataLoadError:
         raise FileExistsError(f"File: '{input_data}' not found")
 
     except pd.errors.EmptyDataError:
-        raise FileExistsError(f"File: '{input_data}' is empty")
+        raise DataLoadError(f"File: '{input_data}' is empty")
 
     except Exception as e:
-        raise FileExistsError(f"Fail in read {input_data} as {input_format}: {e}") from e
+        raise DataLoadError(f"Fail in read {input_data} as {input_format}: {e}") from e
 
     if data.empty:
-        raise FileExistsError(f"Loaded Data: {input_data} are empty after load")
+        raise DataLoadError(f"Loaded Data: {input_data} are empty after load")
 
     return data
 
 
-def rename_columns(data,client_id:str,
-                   price:str,quantity:str,datetime:str,category:str,age:str,product_name:str):
+def rename_columns(data: pd.DataFrame,client_id: str,
+                   price: str,quantity: str,datetime: str,
+                   category: str,age: str,product_name: str) -> pd.DataFrame:
 
     data.rename(
         columns={client_id :'client_id',
-                 #product_name: 'product_name',
+                 product_name: 'product_name',
                         price:'price',
                         quantity:'quantity',
                         datetime:'datetime',
@@ -69,11 +57,11 @@ def rename_columns(data,client_id:str,
     return data
 
 
-def import_data(file_type,file_path):
+def import_data(file_type: str,file_path: str) -> pd.DataFrame:
 
-    data = load_data(file_type,file_path)
-    data = rename_columns(data,'client_id','price','quantity','datetime','category','age','product_name')
-    data = data[['client_id','price','quantity','datetime','category','age','product_name']]
+    data_loaded = load_data(file_type,file_path)
+    data_columns_renamed = rename_columns(data_loaded,'client_id','price','quantity','datetime','category','age','product_name')
+    data_imported = data_columns_renamed[['client_id','price','quantity','datetime','category','age','product_name']]
 
     return data
 

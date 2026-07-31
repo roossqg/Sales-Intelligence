@@ -1,4 +1,4 @@
-from src.data_loading.imports import import_data
+from src.data_loading.importing import import_data
 import pandas as pd
 
 def test_import(data_format_path):

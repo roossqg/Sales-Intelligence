@@ -5,12 +5,12 @@ from sqlalchemy.orm import Session
 from Models.database import sales
 
 
-def export_to_sql(query='SELECT * FROM  sales'):
+def import_from_sql(query: str ='SELECT * FROM  sales') -> pd.DataFrame:
 
     df = pd.read_sql(query,engine)
     
 
-def save_data_in_database(session: Session,data):
+def export_to_sql(session: Session,data: pd.DataFrame) -> str:
 
     for index,row in data.iterrows():
 

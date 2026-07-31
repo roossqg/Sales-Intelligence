@@ -4,7 +4,7 @@ import matplotlib
 import seaborn as sns
 import plotly.express as px
 import streamlit as st
-from data_loading.imports import import_data
+from src.data_loading.importing import import_data
 from data_loading.processing import process
 
 matplotlib.use('QtAgg')
