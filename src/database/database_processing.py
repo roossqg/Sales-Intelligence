@@ -1,4 +1,4 @@
-from src.database.database_create import engine
+from database.database_create import engine
 import pandas as pd
 from database.database_create import session
 from sqlalchemy.orm import Session
@@ -21,3 +21,5 @@ def export_to_sql(session: Session,data: pd.DataFrame) -> str:
         session.add(new_record)
 
     session.commit()
+
+    return "Data saved successfully!"

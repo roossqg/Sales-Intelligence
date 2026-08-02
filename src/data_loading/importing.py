@@ -66,15 +66,3 @@ def import_data(file_type: str,file_path: str) -> pd.DataFrame:
     return data_imported
 
 
-#test:
-data = pd.DataFrame({
-    'client_id':[1,2,3,4,5],
-    'price': [22.3,555,23,67,1000],
-    'quantity':[2,4,7,20,1000],
-    'datetime':['2013-02-10','2013-02-11','2013-02-10','2013-02-16','2013-04-10'],
-    'category':['sports','','sports','','games'],
-    'age':[22,34,19,87,27],
-    'product_name': ['ball','plane','boil','ball','book']
-})
-data = data[['client_id','price','quantity','datetime','category','age','product_name']]
-data.to_csv('sales.csv',index=False)

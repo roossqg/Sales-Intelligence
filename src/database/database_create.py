@@ -1,10 +1,12 @@
-from src.Models.database import session,Base
+from Models.database import session,Base
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker,DeclarativeBase
+from sqlalchemy.orm import sessionmaker,DeclarativeBase,Session
 from settings import settings
 
 engine = create_engine(settings.DATABASE_URL)
 Base.metadata.create_all(engine)
 
-Session = sessionmaker(bind=engine)
-session = session = Session()
+
+def get_session():
+    with Session(engine,expire_on_commit=False) as session:
+        yield session

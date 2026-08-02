@@ -5,10 +5,10 @@ case "$1" in
     poetry run pytest tests/test_import.py -v
     ;;
   streamlit)
-    poetry run streamlit run Scripts/analyst.py
+    poetry run streamlit run sc/analyst.py
     ;;
   app)
-    poetry run python -m Scripts.analyst
+    poetry run python -m src/analyst.py
     ;;
   *)
     echo "use: ./run.sh [test|streamlit|app]"

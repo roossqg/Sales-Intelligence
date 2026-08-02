@@ -1,11 +1,6 @@
-from sqlalchemy import create_engine,Column,Integer,Float,String,DateTime,func
-from sqlalchemy.orm import DeclarativeBase,MappedAsDataclass,Mapped,mapped_column,sessionmaker
+from sqlalchemy.orm import DeclarativeBase,MappedAsDataclass,Mapped,mapped_column
 from datetime import datetime
 from typing import Optional
-
-import os
-
-from settings import settings
 
 class Base(DeclarativeBase,MappedAsDataclass):
     pass
@@ -23,4 +18,7 @@ class sales(Base):
     age_range : Mapped[Optional[str]] = mapped_column(nullable=True) 
     category : Mapped[Optional[str]] = mapped_column(nullable=True) 
     datetime : Mapped[Optional[datetime]]
+    Year: Mapped[int]
+    Month: Mapped[int]
+    Day: Mapped[int]
 

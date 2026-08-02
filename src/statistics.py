@@ -1,7 +1,8 @@
 import pandas as pd
-from scipy.stats import skewtest,shapiro,kurtosis,poisson
+from scipy.stats import skewtest,shapiro,kurtosis,chisquare,poisson,expon,binom
 import numpy as np
 
+from datetime import datetime
 from data_loading.importing import import_data
 from data_loading.processing import process_data
 
@@ -10,10 +11,8 @@ import plotly.express as px
 data_im = import_data('csv','sales.csv')
 data_cl = process_data(data_im)
 
-print(data_cl.columns)
+print(len(data_cl.columns))
 
-
-#make clealry that these infernces are auto,not analiticaly
 
 def mean_ticket_month(data: pd.DataFrame):
 
@@ -24,9 +23,10 @@ def mean_ticket_month(data: pd.DataFrame):
     fig.show()
 
 
-#### stats,prob and tests
+#considerations
+#normality of data: group num distributions and tests significance
+#proprotions tests: group proportions signifcance
 
-#close to the pop mean
 def boostrap_test(data: pd.DataFrame,col: str):
     #simple sampling
 
@@ -46,8 +46,7 @@ def boostrap_test(data: pd.DataFrame,col: str):
     return cohen_d
 
 
-#decorator
-def determine_the_normality_of_data_for_tests(data: pd.DataFrame,col: str) -> dict:
+def determine_the_normality_of_data(data: pd.DataFrame,col: str) -> dict:
 
     appropriate_tests = {'test': ''}
 
@@ -67,37 +66,56 @@ def determine_the_normality_of_data_for_tests(data: pd.DataFrame,col: str) -> di
     else:
         appropriate_tests['test'] = 'Non_Parametric'
 
-
     return appropriate_tests
 
 
-def poisson_prob_for_sales_and_quantity(data: pd.DataFrame,range: str) -> float:
-    '''Decriptive assumption: 
-    these probabilities here are totally based descriptive statistics about the data'''
+def chi_square_tests(data: pd.DataFrame,col: str) -> float:
 
-    #price in day-> prob sell S in 1 month
-    data['revenue_day'] =  data.groupby('Day')['price'].agg('sum')
-    mean_revenue_day = data['revenue_day'].mean()
-    dist_revenue = poisson.cdf(range,mean_revenue_day)
+    observed = data[col].value_counts()
+    proportions = data[col].value_counts(normalize=True)
+    expected = proportions * len(data)
 
-    data['qtd_day'] =  data.groupby('Day')['quantity'].agg('sum')
-    mean_solds_day = data['qtd'].mean()
-    dist_qtd = poisson.cdf(range,mean_solds_day)
+    chi_stat,pval = chisquare(f_exp=expected,f_obs=observed)
 
-    #exponential: time for sale n
+    return pval
+
+
+def prob_quantity_per_time(data: pd.DataFrame,quantity: int,time: datetime) -> float:
+
+    mean_solds_time =  data.groupby(time)['quantity'].agg('sum').mean()
+    prob_qtd_time = poisson.cdf(range,mean_solds_time)
+
+    return prob_qtd_time
+
+
+def prob_revenue_per_time(data: pd.DataFrame,revenue: float,time: datetime) -> float:
+
+    mean_revenue_time =  data.groupby(time)['price'].agg('sum').mean()
+    prob_revenue_time = poisson.cdf(revenue,mean_revenue_time)
+
+    return prob_revenue_time
+   
+
+def prob_sell_specific_product_sector(data: pd.DataFrame,n_product: int ,n_products: int,product: str) -> float:
+
+    p_val_groups = chi_square_tests(data,'product_name')
+    if p_val_groups >= 0.05:
+        print('ChiSquare Goodness-of-Fit Test p-value >5%')
+    else:
+        print('ChiSquare Goodness-of-Fit Test p-value <5%!!')
+
+    data_product = data[(data['product_name'] == product)]
+    prob_product = len(data_product) / len(data)
+
+    bin_dist = binom.cdf(n_product,prob_product,size=n_products)
 
     return data
 
 
+#def age_cat_test_group
 
+#def cat_quant_test
 
-def prob_sell_specific_product_sector(data,product: str):
-    #use binomial
+#def cat_price_test
 
-    #filters
-    return data
-
-
-def product_sales_differences(data: pd.DataFrame):
-
-    return data
+#def expon_for

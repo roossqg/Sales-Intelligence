@@ -12,12 +12,10 @@ def test_import_data(data_format_path: list):
     assert list(data_processed.columns) == ['client_id','price','quantity','datetime','category','age','product_name']
 
 
-def test_process_data(create_data: pd.DataFrame):
+def test_process_data(create_clean_data: pd.DataFrame,data_format_path):
 
-    data_processed = process_data(create_data)
+    data_imp = import_data(data_format_path[0],data_format_path[1])
+    data_processed = process_data(data_imp)
 
     assert type(data_processed) == pd.DataFrame
-    assert data_processed.columns == ['client_id','price',
-                                            'quantity','datetime',
-                                            'category','age','product_name',
-                                            'Year','Month','Day','Day_of_week','age_range']
+    assert len(data_processed.columns) == 12

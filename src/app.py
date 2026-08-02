@@ -16,9 +16,14 @@ st.set_page_config(
 )
 
 
+######### get data from database
+
 age_bins = [0, 18, 25, 35, 45, 55, 65, 120]
 age_labels = ["<18", "18-24", "25-34", "35-44", "45-54", "55-64", "65+"]
 PAllET = px.colors.qualitative.Set2
+
+
+
 
 @st.cache_data
 def load_data(data) -> pd.DataFrame:
