@@ -1,11 +1,10 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib
-import seaborn as sns
 import plotly.express as px
 import streamlit as st
-from src.data_loading.importing import import_data
-from data_loading.processing import process
+from data_loading.importing import import_data
+from data_loading.processing import process_data
 
 matplotlib.use('QtAgg')
 
@@ -158,7 +157,6 @@ def ghp_dist_clients_by_age(df: pd.DataFrame):
 
 
 def ghp_seazonality(df: pd.DataFrame):
-    days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     days_dict = {
         "Monday": "Monday", "Tuesday": "Tuesday", "Wednesday": "Wednesday",
         "Thursday": "Thursday", "Friday": "Friday", "Saturday": "Saturday", "Sunday": "Sunday",
@@ -166,7 +164,6 @@ def ghp_seazonality(df: pd.DataFrame):
     pivot = df.pivot_table(
         index="weekday", columns="hour", values="revenue", aggfunc="sum", fill_value=0
     ).reindex(days_dict)
-    pivot.index = [days_dict[d] for d in pivot.index]
  
     fig = px.imshow(
         pivot,
@@ -220,16 +217,15 @@ def ghp_frequency_sale(df: pd.DataFrame):
     )
 
     return fig
-
+# -> prb of sales in month (poisson)
 
 def ghp_qtd_per_category_time(df: pd.DataFrame, granularity: str = "month"):
-    agg = df.groupby([granularity, "category"], as_index=False)["quantity"].sum()
-    fig = px.area(
+    agg = df.groupby(granularity, as_index=False)["quantity"].sum()
+    fig = px.line(
         agg,
         x=granularity,
         y="quantity",
-        color="category",
-        title="Quantity sold per Category along the time",
+        title="Quantity sold along the time",
         labels={"quantity": "Quantity", granularity: "Period"},
         color_discrete_sequence=PAllET,
     )
@@ -238,10 +234,10 @@ def ghp_qtd_per_category_time(df: pd.DataFrame, granularity: str = "month"):
 
 def main():
     st.title("📊 Sales Dashboard")
-    st.caption("Filter Data in side bar.graphs are generated automatically")
 
     data_imported = import_data('csv','sales.csv')
-    data_preproccessed = process(data_imported)
+    data_preproccessed = process_data(data_imported)
+    print(data_preproccessed.columns)
     data_datetime = load_data(data_preproccessed)
     
     df = apply_filters(data_datetime)
@@ -283,7 +279,7 @@ def main():
  
         top_n_clientes = st.slider("How clients show?", 5, 20, 10)
         st.plotly_chart(ghp_top_clients(df, top_n_clientes), use_container_width=True)
-        #st.plotly_chart(ghp_frequency_sale, use_container_width=True)
+        st.plotly_chart(ghp_frequency_sale(df), use_container_width=True)
  
   
     with tab4:

@@ -17,7 +17,7 @@ def test_process_data(create_data: pd.DataFrame):
     data_processed = process_data(create_data)
 
     assert type(data_processed) == pd.DataFrame
-    assert list(data_processed.columns) == ['client_id','price',
+    assert data_processed.columns == ['client_id','price',
                                             'quantity','datetime',
                                             'category','age','product_name',
                                             'Year','Month','Day','Day_of_week','age_range']
