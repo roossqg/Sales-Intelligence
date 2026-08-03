@@ -1,8 +1,8 @@
-from database.database_create import engine
+from src.database.database_create import engine
 import pandas as pd
-from database.database_create import session
+
 from sqlalchemy.orm import Session
-from Models.database import sales
+from src.Models.database import engine,sales
 
 
 def import_from_sql(query: str ='SELECT * FROM  sales') -> pd.DataFrame:
@@ -10,14 +10,12 @@ def import_from_sql(query: str ='SELECT * FROM  sales') -> pd.DataFrame:
     df = pd.read_sql(query,engine)
     
 
-def export_to_sql(session: Session,data: pd.DataFrame) -> str:
+def export_to_sql(engine,data: pd.DataFrame,table_name: str,session) -> str:
 
-    for index,row in data.iterrows():
-
-        data = row.to_dict()
-
-        new_record = sales(data)
-
+    session = Session(engine)
+    for index, row in data.iterrows():
+        record_dict = row.to_dict()
+        new_record = sales(**record_dict)
         session.add(new_record)
 
     session.commit()
