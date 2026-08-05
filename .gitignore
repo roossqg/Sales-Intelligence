@@ -12,3 +12,4 @@ poetry.lock
 pyproject.toml
 
 synthetic_credit_dataset.csv
+extras/
