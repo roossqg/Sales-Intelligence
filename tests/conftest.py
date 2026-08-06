@@ -1,5 +1,8 @@
 import pytest
 import pandas as pd
+from src.Models.database import Base
+from sqlalchemy import create_engine
+from src.database.database_create import get_session
 
 @pytest.fixture
 def create_clean_data():
@@ -21,3 +24,4 @@ def create_clean_data():
 @pytest.fixture
 def data_format_path():
     return ['csv','sales.csv']
+
