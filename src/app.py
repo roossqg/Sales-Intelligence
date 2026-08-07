@@ -5,6 +5,9 @@ import plotly.express as px
 import streamlit as st
 from data_loading.importing import import_data
 from data_loading.processing import process_data
+from sqlite3 import connect
+from settings import settings
+from data_flow import get_data_sql,export_data_sql
 
 matplotlib.use('QtAgg')
 
@@ -243,9 +246,13 @@ def main():
     data_imported = import_data('csv','sales.csv')
     data_preproccessed = process_data(data_imported)
     print(data_preproccessed.columns)
-    data_datetime = load_data(data_preproccessed)
-    
-    df = apply_filters(data_datetime)
+
+    #process:
+    data_p = export_data_sql('csv','sales.csv')
+    data_s = get_data_sql()
+    data_sql = load_data(data_sql)
+
+    df = apply_filters(data_sql)
     
  
     if df.empty:
