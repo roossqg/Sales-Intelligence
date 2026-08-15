@@ -13,3 +13,8 @@ pyproject.toml
 
 synthetic_credit_dataset.csv
 extras/
+
+sales2.csv
+sales3.csv
+sales4.csv
+test1.py
