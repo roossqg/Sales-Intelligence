@@ -1,15 +1,13 @@
 import pandas as pd
-import matplotlib.pyplot as plt
-import matplotlib
 import plotly.express as px
 import streamlit as st
 from data_loading.importing import import_data
 from data_loading.processing import process_data
 from sqlite3 import connect
-from settings import settings
-from data_flow import get_data_sql,export_data_sql
 
-matplotlib.use('QtAgg')
+
+st.markdown('Graphs')
+st.sidebar.markdown('Graphs')
 
 
 st.set_page_config(
@@ -18,13 +16,9 @@ st.set_page_config(
     layout="wide",
 )
 
-
-######### get data from database
-
 age_bins = [0, 18, 25, 35, 45, 55, 65, 120]
-age_labels = ["<18", "18-24", "25-34", "35-44", "45-54", "55-64", "65+"]
-PAllET = px.colors.qualitative.Set2
-
+age_labels = ['-18','18-25','25-32','32-45','45-55','55-65','65+']
+PAllET = px.colors.qualitative.Plotly
 
 
 
@@ -93,26 +87,47 @@ def show_kpis(df: pd.DataFrame):
     unique_clients = df["client_id"].nunique()
     mean_price = df["price"].mean()
  
-    col1, col2, col3, col4, col5 = st.columns(5)
-    col1.metric("💰 Total Revenue", f"R$ {total_revenue:,.2f}")
+    col1, col2 = st.columns(2)
+    col1.metric("💰 Total Revenue", f"$ {total_revenue:,.2f}")
     col2.metric("📦 Sold Products", f"{total_qtd:,.0f}")
+
+    col3,col4,col5 = st.columns(3)
     col3.metric("👥 Unique Clients", f"{unique_clients:,.0f}")
-    col4.metric("🧾 Mean Ticket (ATV)", f"R$ {mean_ticket:,.2f}")
+    col4.metric("🧾 Mean Ticket", f"R$ {mean_ticket:,.2f}")
     col5.metric("🏷️ Mean Price", f"R$ {mean_price:,.2f}")
 
 
 def ghp_revenue_time(df: pd.DataFrame, granunality: str = "date"):
-    revenue = df.groupby(granunality, as_index=False)["revenue"].sum()
-    fig = px.line(
-        revenue,
-        x=granunality,
-        y="revenue",
-        markers=True,
-        title="Revenue Along the time",
-        labels={"revenue": "Revenue ($)", granunality: "Period"},
-        color_discrete_sequence=PAllET,
-    )
-    fig.update_layout(hovermode="x unified")
+
+    cat1 = st.selectbox('Color Revenue By: ',['age_range','product_name','category'])
+
+    if st.checkbox(cat1):
+        revenue = df.groupby([granunality,cat1], as_index=False)["revenue"].sum()
+        fig = px.line(
+            revenue,
+            x=granunality,
+            y="revenue",
+            color=cat1,
+            markers=True,
+            title="Revenue Along the time",
+            labels={"revenue": "Revenue ($)", granunality: f"Period: {granunality}"},
+            color_discrete_sequence=PAllET,
+        )
+        fig.update_layout(hovermode="x unified")
+
+    else:
+        revenue = df.groupby(granunality, as_index=False)["revenue"].sum()
+        fig = px.line(
+            revenue,
+            x=granunality,
+            y="revenue",
+            markers=True,
+            title="Revenue Along the time",
+            labels={"revenue": "Revenue ($)", granunality: f"Period: {granunality}"},
+            color_discrete_sequence=PAllET,
+        )
+        fig.update_layout(hovermode="x unified")
+
     return fig
 
 
@@ -164,41 +179,24 @@ def ghp_dist_clients_by_age(df: pd.DataFrame):
     return fig
 
 
-def ghp_seazonality(df: pd.DataFrame):
+def ghp_seazonality(df: pd.DataFrame,time):
     days_dict = {
         "Monday": "Monday", "Tuesday": "Tuesday", "Wednesday": "Wednesday",
         "Thursday": "Thursday", "Friday": "Friday", "Saturday": "Saturday", "Sunday": "Sunday",
     }
+
+    df = df.groupby(['weekday',time])['revenue'].sum().reset_index()
+
     pivot = df.pivot_table(
-        index="weekday", columns="hour", values="revenue", aggfunc="sum", fill_value=0
+        index="weekday", columns=time, values="revenue", aggfunc="sum", fill_value=0
     ).reindex(days_dict)
  
     fig = px.imshow(
         pivot,
         aspect="auto",
         title="Seasonality of Sales by time",
-        labels=dict(x="Hour", y="Week Day", color="Revenue $"),
-        color_continuous_scale="Sunsetdark",
-    )
-    return fig
-
-
-def ghp_top_clients(df: pd.DataFrame, top_n: int = 10):
-    top = (
-        df.groupby("client_id", as_index=False)["revenue"]
-        .sum()
-        .sort_values("revenue", ascending=False)
-        .head(top_n)
-    )
-    top["client_id"] = top["client_id"].astype(str)
-    fig = px.bar(
-        top,
-        x="client_id",
-        y="revenue",
-        title=f"Top {top_n} clients revenue",
-        labels={"revenue": "Revenue $", "client_id": "Client"},
-        color="revenue",
-        color_continuous_scale="Greens",
+        labels=dict(x=f'{time}', y="Week Day", color="Revenue $"),
+        color_continuous_scale="magma",
     )
     return fig
 
@@ -218,41 +216,63 @@ def ghp_frequency_sale(df: pd.DataFrame):
         y="frequency",
         size="monetary",
         color="monetary",
+        size_max=15,
         hover_name="client_id",
+        opacity=0.65,
         title="Recency x Frequency Per Buy for Client",
         labels={"recency": "Days since last Buy ", "frequency": "Nº Buy"},
-        color_continuous_scale="Purples",
+        color_continuous_scale="Reds",
     )
 
     return fig
-# -> prb of sales in month (poisson)
+
 
 def ghp_qtd_per_category_time(df: pd.DataFrame, granularity: str = "month"):
-    agg = df.groupby(granularity, as_index=False)["quantity"].sum()
-    fig = px.line(
-        agg,
-        x=granularity,
-        y="quantity",
-        title="Quantity sold along the time",
-        labels={"quantity": "Quantity", granularity: "Period"},
-        color_discrete_sequence=PAllET,
-    )
+
+
+    cat2 = st.selectbox('Color Quantity By: ' ,['category','product_name','age_range'])
+
+    if st.checkbox(cat2):
+
+        agg = df.groupby([granularity,cat2], as_index=False)["quantity"].sum()
+        fig = px.area(
+                agg,
+                x=granularity,
+                y="quantity",
+                color = cat2,
+                title="Quantity sold along the time",
+                labels={"quantity": "Quantity", granularity: f"Period: {granularity}"},
+                color_discrete_sequence=PAllET,
+            )
+    
+
+    else:
+
+        agg = df.groupby(granularity, as_index=False)["quantity"].sum()
+
+        fig = px.area(
+            agg,
+            x=granularity,
+            y="quantity",
+            title="Quantity sold along the time",
+            labels={"quantity": "Quantity", granularity: f"Period: {granularity}"},
+            color_discrete_sequence=PAllET,
+        )
+
+
     return fig
 
 
 def main():
     st.title("📊 Sales Dashboard")
 
-    data_imported = import_data('csv','sales.csv')
+    data_imported = import_data('csv','sales4.csv')
     data_preproccessed = process_data(data_imported)
-    print(data_preproccessed.columns)
+    data_preproccessed = load_data(data_preproccessed)
 
     #process:
-    data_p = export_data_sql('csv','sales.csv')
-    data_s = get_data_sql()
-    data_sql = load_data(data_sql)
 
-    df = apply_filters(data_sql)
+    df = apply_filters(data_preproccessed)
     
  
     if df.empty:
@@ -263,16 +283,21 @@ def main():
     st.divider()
  
     tab1, tab2, tab3, tab4 = st.tabs(
-        ["📈 General", "🛒 Products & Categories", "👥 Clients", "🕒 Seazonality"]
+        ["📈 General", "🛒 Products", "👥 Clients", "🕒 Seasonality"]
     )
  
     
     with tab1:
-        granularity = st.radio(
-            "Group revenue by:", ["date", "week", "month"], horizontal=True, index=2
+        granularity = st.selectbox(
+            "Group revenue by:", ["date", "week", "month"]
         )
         st.plotly_chart(ghp_revenue_time(df, granularity), use_container_width=True)
-        st.plotly_chart(ghp_qtd_per_category_time(df, "month"), use_container_width=True)
+
+
+        granularity2 = st.selectbox(
+                    "Group quantity by:", ["date", "week", "month"]
+                )
+        st.plotly_chart(ghp_qtd_per_category_time(df, granularity2), use_container_width=True)
  
     
     with tab2:
@@ -281,6 +306,7 @@ def main():
             top_n = st.slider("How products show?", 5, 20, 10)
             st.plotly_chart(ghp_top_products(df, top_n), use_container_width=True)
         with col_b:
+            
             st.plotly_chart(ghp_participation_per_category(df), use_container_width=True)
  
     
@@ -289,13 +315,15 @@ def main():
         with col_a:
             st.plotly_chart(ghp_dist_clients_by_age(df), use_container_width=True)
  
-        top_n_clientes = st.slider("How clients show?", 5, 20, 10)
-        st.plotly_chart(ghp_top_clients(df, top_n_clientes), use_container_width=True)
         st.plotly_chart(ghp_frequency_sale(df), use_container_width=True)
  
   
     with tab4:
-        st.plotly_chart(ghp_seazonality(df), use_container_width=True)
+        time = st.selectbox(
+                            "Select Period:", ["month", "Year", "hour"]
+                        )
+
+        st.plotly_chart(ghp_seazonality(df,time), use_container_width=True)
  
  
 if __name__ == "__main__":

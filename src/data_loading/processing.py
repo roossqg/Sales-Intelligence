@@ -17,45 +17,19 @@ def datetime_numbers(data: pd.DataFrame,target_col: str = 'datetime') -> pd.Data
     return data
 
 
-def input_missing_category(data: pd.DataFrame,target_col: str = 'category') -> pd.DataFrame:
-
-    data = datetime_numbers(data)
-
-    df = data.drop(columns=['datetime','product_name']) # we already have date numbers
-
-    features = [col for col in df.columns if col != target_col]
-    
-    non_null_df = df[df[target_col].notna()]
-    null_df = df[df[target_col].isna()]
-    
-    if null_df.empty:
-        return df
-    
-    X_train = non_null_df[features]
-    y_train = non_null_df[target_col]
-
-    X_pred = null_df[features]
-    
-    inputer = RandomForestClassifier(n_estimators=200,max_samples=300,criterion='log_loss')
-    inputer.fit(X_train,y_train)
-
-    data.loc[data[target_col].isna(),target_col] = inputer.predict(X_pred)
-
-    return data
-
-
 def input_missing_values(data: pd.DataFrame) -> pd.DataFrame:
 
     inputs = {
         'age':data['age'].mean(),
+        'price': data['price'].mean(),
+        'quantity': data['quantity'].mean(),
+        'product_name': "Unknown Product",
+        'category': 'Unknown Category'
     }
 
     data.fillna(value=inputs,inplace=True) # -> input null features
-    data = input_missing_category(data)
+    data = datetime_numbers(data)
 
-    #after input cats
-    data[['price','quantity']] = data.groupby('category')[['price','quantity']].transform(
-                lambda x: x.fillna(x.mean))
     
     return data
 
