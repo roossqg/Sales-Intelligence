@@ -1,12 +1,16 @@
 from statsmodels.tsa.arima.model import ARIMA
 from statsmodels.tsa.seasonal import seasonal_decompose
-from statsmodels.tsa.tsatools import adfuller
+from statsmodels.tsa.stattools import adfuller
 import matplotlib.pyplot as plt
 import numpy as np
 from statsmodels.graphics.tsaplots import plot_acf,plot_pacf
 import pandas as pd
 import streamlit as st
 
+
+#from app import load_data
+import matplotlib
+matplotlib.use('Agg')
 
 #times periods + (qtd,revenue)
 #groups per category,age,products
@@ -17,19 +21,34 @@ import streamlit as st
 
 def plot_arima_graphs(data,col,time_period):
     #plot series of respective time series
-    plt.plot(y=data[col],x=data[time_period],color='red',label='data')
+
+    data = pd.DataFrame({
+        'datetime': data[time_period],
+        'series': data[col]
+    })
+
+    data = data.set_index('datetime')
+
+    fig1, ax1 = plt.subplots()
+
+    ax1.plot(data,color='red',label='data')
+    st.pyplot(fig1)
+    
 
     #ar,ma,armax
-    plot_acf(data[col],lags=20,alpha=0.05)
-    plot_pacf(data[col],lags=20,alpha=0.05)
+    fig2,ax2 = plt.subplots()
+    plot_acf(data,lags=20,alpha=0.05,ax=ax2)
+    
 
-    sea = seasonal_decompose(x=data[time_period],y=data[col])
-    sea.plot()
-
-    plt.show()
+    fig3,ax3 = plt.subplots()
+    figplot_pacf(data,lags=20,alpha=0.05,ax=ax3)
 
 
-def forecast_arima(time_period,predict_range,steps,col,data: pd.data,model: tuple):
+    #sea = seasonal_decompose(x=data[col])
+    #sea.plot()
+
+
+def forecast_arima(time_period,predict_range,steps,col,data,model: tuple):
 
     test = adfuller(data[col])
     st.metric('adfuller: ',test)
@@ -82,4 +101,3 @@ def forecast_arima(time_period,predict_range,steps,col,data: pd.data,model: tupl
 
 
     return metrics
-

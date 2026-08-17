@@ -12,7 +12,7 @@ poetry.lock
 pyproject.toml
 
 synthetic_credit_dataset.csv
-extras/
+extras
 
 sales2.csv
 sales3.csv

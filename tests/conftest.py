@@ -23,5 +23,5 @@ def create_clean_data():
 
 @pytest.fixture
 def data_format_path():
-    return ['csv','sales.csv']
+    return ['csv','sales4.csv']
 
