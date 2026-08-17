@@ -11,8 +11,9 @@ data_p = process_data(data_i)
 #define problems-funcs:
 
 
-
-def product_sale_optimization():
+#limits: price limits and qtd limits
+#constraints: 1.budget per product,2.capacity per product,3.category min/max
+def product_sale_optimization() -> variables for maximize: 
 
     # price x quat
     model = pulp.LpProblem('Best price-qtd',pulp.LpMaximize)
@@ -20,29 +21,37 @@ def product_sale_optimization():
     #price = pulp.LpVariable('price',lowBound=20,upBound=,cat='Integer')
 
     #fix:
-    price = 40 
-    discount = pulp.LpVariable('price',lowBound=0,upBound=None,cat='Integer')
-    quantity = pulp.LpVariable('quantity',lowBound=0,upBound=None,cat='Integer')
+    price = pulp.LpVariable('price',lowBound=0,upBound=price_limits,cat='Float')
+    quantity = pulp.LpVariable('quantity',lowBound=0,upBound=product_limits,cat='Integer')
+ 
+    model += price * quantity
 
-    model += (price - discount)  * quantity
+    #budget
+    model += product_cost * quantity <= cost_limit
+
+
+    #capacity
+    model += sum(quantity) <= sum(product_capacity)  
+    model += quantity <= product_capacity
+
     model.solve()
 
     results = {
         'status': pulp.LpStatus[model.status],
-        'Variables': {'quantity': quantity.varValue},
+        'Variables': {'quantity': quantity.varValue,'price':price.varValue},
         'Objective(max)': pulp.value(model.objective)
     }
 
     return results
 
-    #return best price-qtd given budget,capacity and minimum demand
+    
 
 
-def plan_stock():
-
+#limits: price limits,demand model(datetime,qtd,price)
+#constraints: 1.conf interval
 def price_opt()
 
-def plan_cat():
+
+
 
 print(product_sale_optimization())
-
