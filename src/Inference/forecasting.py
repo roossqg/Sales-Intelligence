@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from statsmodels.graphics.tsaplots import plot_acf,plot_pacf
 import pandas as pd
+import streamlit as st
 
 
 #times periods + (qtd,revenue)
@@ -14,30 +15,27 @@ import pandas as pd
 
 #plot eavluations for confidence
 
-def select_forecast_model(data,col,time_period,predict_range) -> graphs:
+def plot_arima_graphs(data,col,time_period):
     #plot series of respective time series
     plt.plot(y=data[col],x=data[time_period],color='red',label='data')
-
-
-    
-    #test
-    test = adfuller(data[col]) 
 
     #ar,ma,armax
     plot_acf(data[col],lags=20,alpha=0.05)
     plot_pacf(data[col],lags=20,alpha=0.05)
 
-
     sea = seasonal_decompose(x=data[time_period],y=data[col])
     sea.plot()
 
+    plt.show()
 
 
-def forecast_arima(time_period,predict_range,steps,col,data: pd.data,model: tuple) -> table predicts for time range:
+def forecast_arima(time_period,predict_range,steps,col,data: pd.data,model: tuple):
 
+    test = adfuller(data[col])
+    st.metric('adfuller: ',test)
+    st.text_input('Select model: ',key='model')
+    model = st.session_state.model
 
-    #select model:
-    select_forecast_model(data,col,time_period,predict_range)
 
     #predicts
     if model[1] != 0:
@@ -48,17 +46,40 @@ def forecast_arima(time_period,predict_range,steps,col,data: pd.data,model: tupl
     results_predicts = model.get_predictions(steps=steps)
     results_forecast = model.get_forecast(steps=steps)
 
+    predicts = results_predicts.predictions_mean
+    forecast = results_forecast.predictions_mean
+
+    predict_int = results_predicts.conf_int()
+    forecast_int = results_forecast.conf_int()
+
     #evaluate
     metrics = {'AIC': model.aic,'BIC':model.bic}
     summary = model.summary()
 
-    plt.plot(results_forecast.index,results_forecast,color='blue',label='forecast')
-    plt.plot(results_forecast.index,results_forecast,color='blue',label='predicts')
+    plt.plot(predicts.index,predicts,color='blue',label='predicts')
 
-    #print box-jenkis method
+    plt.fill_between(
+    predict_int.index,
+    predict_int.iloc[:, 0],
+    predict_int.iloc[:, 1],
+    color='blue',
+    alpha=0.2,
+    label='Conf Int'
+    )
+    
+    plt.plot(forecast.index,forecast,color='blue',label='forecast')
+    plt.fill_between(
+        forecast_int.index,
+        forecast_int.iloc[:, 0],
+        forecast_int.iloc[:, 1],
+        color='blue',
+        alpha=0.2,
+        label='Conf Int'
+        )
 
     plt.legend()
     plt.show()
 
 
-    return 
+    return metrics
+
