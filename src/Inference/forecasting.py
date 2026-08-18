@@ -41,52 +41,52 @@ def plot_arima_graphs(data,col,time_period):
     
 
     fig3,ax3 = plt.subplots()
-    figplot_pacf(data,lags=20,alpha=0.05,ax=ax3)
+    plot_pacf(data,lags=20,alpha=0.05,ax=ax3)
 
 
     #sea = seasonal_decompose(x=data[col])
     #sea.plot()
 
 
-def forecast_arima(time_period,predict_range,steps,col,data,model: tuple):
-
-    test = adfuller(data[col])
-    st.metric('adfuller: ',test)
-    st.text_input('Select model: ',key='model')
-    model = st.session_state.model
-
+def forecast_arima(data,steps=20,model: tuple = (1,0,1)):
 
     #predicts
     if model[1] != 0:
-        model = ARIMA(x=data[time_period],y=data[col],order=model,exog=model[4]).fit()
+        model = ARIMA(data,order=model,exog=model[4])
+        
     else:
-        model = ARIMA(x=data[time_period],y=data[col],order=model).fit()
+        model = ARIMA(data,order=model)
+        
 
-    results_predicts = model.get_predictions(steps=steps)
+    model = model.fit()
+
+    #results_predicts = model.get (steps=steps)
     results_forecast = model.get_forecast(steps=steps)
 
-    predicts = results_predicts.predictions_mean
-    forecast = results_forecast.predictions_mean
+    #predicts = results_predicts.predicted_mean
+    forecast = results_forecast.predicted_mean
 
-    predict_int = results_predicts.conf_int()
+    #predict_int = results_predicts.conf_int()
     forecast_int = results_forecast.conf_int()
 
     #evaluate
     metrics = {'AIC': model.aic,'BIC':model.bic}
     summary = model.summary()
 
-    plt.plot(predicts.index,predicts,color='blue',label='predicts')
+    #ax1,fig1 = plt.subplots()
+    #plt.plot(predicts.index,predicts,color='blue',label='predicts')
 
-    plt.fill_between(
-    predict_int.index,
-    predict_int.iloc[:, 0],
-    predict_int.iloc[:, 1],
-    color='blue',
-    alpha=0.2,
-    label='Conf Int'
-    )
-    
-    plt.plot(forecast.index,forecast,color='blue',label='forecast')
+    #plt.fill_between(
+    #predict_int.index,
+    #predict_int.iloc[:, 0],
+    #predict_int.iloc[:, 1],
+    #color='blue',
+    #alpha=0.2,
+    #label='Conf Int'
+    #)
+
+    fig2,ax2 = plt.subplots()
+    ax2.plot(forecast.index,forecast,color='blue',label='forecast')
     plt.fill_between(
         forecast_int.index,
         forecast_int.iloc[:, 0],
@@ -95,9 +95,6 @@ def forecast_arima(time_period,predict_range,steps,col,data,model: tuple):
         alpha=0.2,
         label='Conf Int'
         )
-
     plt.legend()
-    plt.show()
 
-
-    return metrics
+    return {'figs': fig2,'summary':summary,'metrics':metrics}

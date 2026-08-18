@@ -1,11 +1,11 @@
 import pandas as pd
 import plotly.express as px
 import streamlit as st
-from src.data_loading.importing import import_data
-from src.data_loading.processing import process_data
+from data_loading.importing import import_data
+from data_loading.processing import process_data
 from sqlite3 import connect
 
-from src.Inference.forecasting import plot_arima_graphs,forecast_arima
+#from Inference.forecasting import plot_arima_graphs,forecast_arima
 
 st.markdown('Graphs')
 st.sidebar.markdown('Graphs')
@@ -326,11 +326,29 @@ def main():
 
         st.plotly_chart(ghp_seazonality(df,time), use_container_width=True)
 
-        fig1,fig2,fig3 = plot_arima_graphs(df,col='revenue',time_period='month')
+
+
+        data = pd.DataFrame({
+                'datetime': df['month'],
+                'series': df['revenue']
+            })
+        data = data.set_index('datetime')
+
+        import matplotlib.pyplot as plt
+        from statsmodels.graphics.tsaplots import plot_acf,plot_pacf
+
+        fig1,ax1 = plt.subplots()
+        ax1.plot(data,color='red',label='data')
         st.pyplot(fig1)
+
+        #ar,ma,armax
+        fig2,ax2 = plt.subplots()
+        plot_acf(data,lags=20,alpha=0.05,ax=ax2)
         st.pyplot(fig2)
+
+        fig3,ax3 = plt.subplots()
+        plot_pacf(data,lags=20,alpha=0.05,ax=ax3)
         st.pyplot(fig3)
- 
  
 if __name__ == "__main__":
     main()
