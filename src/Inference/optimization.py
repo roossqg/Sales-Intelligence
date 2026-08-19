@@ -1,10 +1,18 @@
 import pulp
 import pandas as pd
-from src.data_loading.importing import import_data
-from src.data_loading.processing import process_data
+from data_loading.importing import import_data
+from data_loading.processing import process_data
 
-data_i = import_data('csv','sales.csv')
+data_i = import_data('csv','sales4.csv')
 data_p = process_data(data_i)
+data = data_p.groupby('product_name',as_index=False).agg(
+    price = ('price','mean')
+)
+
+prices = {data.loc[i,'product_name']: data['price'].mean() for i in data.index}
+bud = data['price'].sum()
+capacity_weight = {data.loc[i,'product_name']: 10 for i in data.index}
+
 
 ##product opt
 
@@ -13,45 +21,50 @@ data_p = process_data(data_i)
 
 #limits: price limits and qtd limits
 #constraints: 1.budget per product,2.capacity per product,3.category min/max
-def product_sale_optimization() -> variables for maximize: 
+def product_sale_optimization(data,prices,costs,capacity_weight,total_capacity,budget): 
+
+    #data:
+    products = data['product_name'].unique()
+
+    data = data_i.groupby('product_name',as_index=False).agg(
+    price = ('price','mean')
+)
+
+    #total_capacity = 15000
 
     # price x quat
-    model = pulp.LpProblem('Best price-qtd',pulp.LpMaximize)
+    model = pulp.LpProblem('profit maximization',pulp.LpMaximize)
 
-    #price = pulp.LpVariable('price',lowBound=20,upBound=,cat='Integer')
-
-    #fix:
-    price = pulp.LpVariable('price',lowBound=0,upBound=price_limits,cat='Float')
-    quantity = pulp.LpVariable('quantity',lowBound=0,upBound=product_limits,cat='Integer')
+    quantity = pulp.LpVariable.dicts('quantity',products,lowBound=0,upBound=None,cat='Integer')
+    
  
-    model += price * quantity
+    #model += (prices * quantity) - (costs * quantity) #profit
+    model += pulp.lpSum((prices[i] * quantity[i]) - (costs[i] * quantity[i]) for i in products)
 
-    #budget
-    model += product_cost * quantity <= cost_limit
+    model += pulp.lpSum(costs[i] * quantity[i] for i in products) <= budget
 
-
-    #capacity
-    model += sum(quantity) <= sum(product_capacity)  
-    model += quantity <= product_capacity
+    for i in products:
+        model += capacity_weight[i] * quantity[i] <= total_capacity[i]
 
     model.solve()
 
     results = {
         'status': pulp.LpStatus[model.status],
-        'Variables': {'quantity': quantity.varValue,'price':price.varValue},
+        'Variables': {'quantity': {i : quantity[i].varValue for i in  products},
+                'price': {i : prices[i] for i in  prices.keys()}},
         'Objective(max)': pulp.value(model.objective)
     }
 
     return results
 
-    
-
 
 #limits: price limits,demand model(datetime,qtd,price)
 #constraints: 1.conf interval
-def price_opt()
+#def price_opt()
+
+#dataf = product_sale_optimization(data_p)
+#datag = pd.DataFrame({'product':dataf['Variables']['quantity'].keys(),
+                      #'quantity':dataf['Variables']['quantity'].values()})
 
 
-
-
-print(product_sale_optimization())
+#print(datag['quantity'].value_counts())

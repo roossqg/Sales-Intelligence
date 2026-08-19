@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 from statsmodels.graphics.tsaplots import plot_acf,plot_pacf
 from statsmodels.tsa.seasonal import seasonal_decompose
 from Inference.forecasting import forecast_arima
-
+from Inference.optimization import product_sale_optimization
 
 st.markdown('Forecast and Optimization')
 st.sidebar.markdown('Forecast and Optimization')
@@ -42,7 +42,7 @@ data = pd.DataFrame({
 data = data.groupby('datetime',as_index=True)['series'].sum()
 
 
-tab1,tab2 = st.tabs(['Series Dignostics','Model_selection'])
+tab1,tab2,tab3 = st.tabs(['Series Dignostics','Model_selection','Optimization'])
 
 with tab1:
 
@@ -83,3 +83,40 @@ with tab2:
 
     fig = results['figs']
     st.pyplot(fig)
+
+with tab3:
+    data_op = import_data('csv','sales4.csv')
+    data_op = process_data(data_op)
+    data_op = load_data(data_op)
+
+    data = data_op.groupby('product_name',as_index=False).agg(
+        price = ('price','mean'))
+
+    prices = {data.loc[i,'product_name']: float(data.loc[i,'price']) for i in data.index}
+    costs = {data.loc[i,'product_name']: float(data['price'].mean()) for i in data.index}
+    capacity_weight = {data.loc[i,'product_name']: 10 for i in data.index}
+    total_capacity =  {data.loc[i,'product_name']: 500 for i in data.index}
+    
+    budget = 50000
+
+    results = product_sale_optimization(data,prices,costs,capacity_weight,total_capacity,budget)
+
+    st.header('Results')
+
+    col1,col2,col3 = st.columns(3)
+
+    col1.metric('Model status', results['status'])
+    col2.metric('Total profit', results['Objective(max)'])
+
+
+    datag = pd.DataFrame({'product':results['Variables']['quantity'].keys(),
+                      'quantity':results['Variables']['quantity'].values(),
+                      'prices':results['Variables']['price'].values()})
+    st.dataframe(datag)
+
+    col4,col5 = st.columns(2)
+
+    with col4:
+        st.bar_chart(datag.set_index('product')['quantity'])
+
+
