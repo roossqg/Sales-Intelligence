@@ -52,7 +52,7 @@ def forecast_arima(data,steps=20,model: tuple = (1,0,1)):
 
     #predicts
     if model[1] != 0:
-        model = ARIMA(data,order=model,exog=model[4])
+        model = ARIMA(data,order=model)
         
     else:
         model = ARIMA(data,order=model)
@@ -86,7 +86,7 @@ def forecast_arima(data,steps=20,model: tuple = (1,0,1)):
     #)
 
     fig2,ax2 = plt.subplots()
-    ax2.plot(forecast.index,forecast,color='blue',label='forecast')
+    ax2.plot(forecast,color='blue',label='forecast')
     plt.fill_between(
         forecast_int.index,
         forecast_int.iloc[:, 0],
