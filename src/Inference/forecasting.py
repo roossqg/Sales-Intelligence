@@ -48,7 +48,7 @@ def plot_arima_graphs(data,col,time_period):
     #sea.plot()
 
 
-def forecast_arima(data,steps=20,model: tuple = (1,0,1)):
+def forecast_arima(data,steps=20,model: tuple = (1,0,1),p='d'):
 
     #predicts
     if model[1] != 0:
@@ -85,8 +85,28 @@ def forecast_arima(data,steps=20,model: tuple = (1,0,1)):
     #label='Conf Int'
     #)
 
+    data.index = pd.to_datetime(data.index)
+    #forecast.index = pd.to_datetime(forecast.index)
+    #forecast_int = pd.to_datetime(forecast_int.index)
+
+    plt.clf()
+
+    if p == 'd':
+        f = 'D'
+    else:
+        f = 'MS'
+
+    new_data = data.index.max()
+    data_r = pd.date_range(
+        start = new_data,periods=steps + 1
+    )[1:]
+
+    forecast.index = data_r
+    forecast_int.index = data_r
+
     fig2,ax2 = plt.subplots()
-    ax2.plot(forecast,color='blue',label='forecast')
+    ax2.plot(data.index,data,color='red',label='data')
+    ax2.plot(forecast.index,forecast,color='blue',label='forecast')
     plt.fill_between(
         forecast_int.index,
         forecast_int.iloc[:, 0],
@@ -96,5 +116,6 @@ def forecast_arima(data,steps=20,model: tuple = (1,0,1)):
         label='Conf Int'
         )
     plt.legend()
+    plt.show()
 
     return {'figs': fig2,'summary':summary,'metrics':metrics}

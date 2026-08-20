@@ -32,11 +32,11 @@ def main():
 
     datetime_type = st.sidebar.selectbox('Select datetime metric: ',['month','datetime'])
     if datetime_type == 'datetime':
-        lags = 10
-        period = 12
+        lags = 7
+        period = 7
     else: 
-        period = 1
-        lags = 1
+        period = 12
+        lags = 12
 
     data = pd.DataFrame({
                     'datetime': df[datetime_type],
@@ -44,6 +44,9 @@ def main():
                 })
         
     data = data.groupby('datetime',as_index=True)['series'].sum()
+    data.index = pd.to_datetime(data.index)
+    plt.clf()
+    st.dataframe(data.head())
 
 
     tab1,tab2,tab3 = st.tabs(['Series Dignostics','Model_selection','Optimization'])
@@ -79,18 +82,17 @@ def main():
     with tab2:
 
         test = adfuller(data)
-        st.metric('adfuller p_value: ', test[1])
-        #st.text_input('Select model: ',key='model')
-        #model = st.session_state.model
+        st.metric('AdFuller Test p_value: ', test[1])
+        
 
         ar = st.number_input(label='Ar lag',value=1,key='ar')
         ma = st.number_input(label='Ma lag',value=1,key='ma')
-        diff = st.number_input(label='diff lag',value=0,key='diff')
+        diff = st.number_input(label='Diff lag',value=0,key='diff')
 
         model = (ar,diff,ma)
         steps = st.number_input(label='steps',value=10,key='step')
 
-        results = forecast_arima(data,steps,model)
+        results = forecast_arima(data,steps,model,p='d')
 
         fig = results['figs']
         st.pyplot(fig)
