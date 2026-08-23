@@ -1,7 +1,7 @@
 from src.Inference.forecasting import plot_arima_graphs,forecast_arima
 from src.data_loading.importing import import_data
 from src.data_loading.processing import process_data
-from src.app import load_data
+from src.app.app import load_data
 
 import pandas as pd
 import matplotlib.pyplot as plt

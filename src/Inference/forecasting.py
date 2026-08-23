@@ -1,29 +1,18 @@
 from statsmodels.tsa.arima.model import ARIMA
 from statsmodels.tsa.seasonal import seasonal_decompose
-from statsmodels.tsa.stattools import adfuller
 import matplotlib.pyplot as plt
-import numpy as np
 from statsmodels.graphics.tsaplots import plot_acf,plot_pacf
 import pandas as pd
-import streamlit as st
 
 
-#from app import load_data
 import matplotlib
 matplotlib.use('Agg')
 
-#times periods + (qtd,revenue)
-#groups per category,age,products
-#conf interval + plots + evaluate-compare
-#cautions of less sales
-
-#plot eavluations for confidence
 
 def plot_arima_graphs(data):
     fig1, ax1 = plt.subplots()
     ax1.plot(data,color='red',label='data')
 
-    #ar,ma,armax
     fig2,ax2 = plt.subplots()
     plot_acf(data,lags=20,alpha=0.05,ax=ax2)
     
@@ -81,10 +70,6 @@ def forecast_arima(data,steps=20,model: tuple = (1,0,1),p='d'):
 
     plt.clf()
 
-    if p == 'd':
-        f = 'D'
-    else:
-        f = 'MS'
 
     new_data = data.index.max()
     data_r = pd.date_range(

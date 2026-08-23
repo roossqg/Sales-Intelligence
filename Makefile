@@ -1,23 +1,18 @@
-dash:
-	poetry run streamlit run /home/augusto2/Sales_inteligence_dh-api/src/app.py
+app:
+	poetry run streamlit run /home/augusto2/Sales_inteligence_dh-api/src/app/main.py
 
-dh:
-	poetry run streamlit run /home/augusto2/Sales_inteligence_dh-api/src/main.py
+app_py:
+	poetry run python -m  /home/augusto2/Sales_inteligence_dh-api/src/app/main.py
 
-stats:
-	poetry run python -m src.Inference.optimization
-
-dt:
-	poetry run python -m src.Inference.forecasting
-
-t_data:
+#tests
+tests_data:
 	poetry run pytest tests/test_process_data.py
 
-t_fr:
+tests_forecast:
 	poetry run pytest tests/test_forecast.py
-t_op:
+
+tests_optimization:
 	poetry run pytest tests/tests_optimization.py
 
-
-dt1:
-	poetry run streamlit run /home/augusto2/Sales_inteligence_dh-api/app_copy.py
+tests_stats:
+	poetry run pytest tests/test_statistics.py

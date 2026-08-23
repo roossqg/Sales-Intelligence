@@ -1,8 +1,7 @@
-from src.Inference.forecasting import plot_arima_graphs,forecast_arima
 from src.Inference.statistics import mean_ticket_month,determine_the_normality_of_data,chi_square_tests
 from src.data_loading.importing import import_data
 from src.data_loading.processing import process_data
-from src.app import load_data
+from src.app.app import load_data
 import plotly.express as px
 
 import pandas as pd

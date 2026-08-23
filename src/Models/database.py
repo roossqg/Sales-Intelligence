@@ -1,7 +1,7 @@
 from sqlalchemy.orm import DeclarativeBase,MappedAsDataclass,Mapped,mapped_column
 from datetime import datetime
 from typing import Optional
-from src.database.database_create import engine
+from database.database_create import engine
 
 class Base(DeclarativeBase,MappedAsDataclass):
     pass

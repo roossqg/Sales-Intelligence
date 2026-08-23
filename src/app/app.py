@@ -1,11 +1,11 @@
 import pandas as pd
 import plotly.express as px
 import streamlit as st
-from src.data_loading.importing import import_data
-from src.data_loading.processing import process_data
-from sqlite3 import connect
+from data_loading.importing import import_data
+from data_loading.processing import process_data
 
-#from Inference.forecasting import plot_arima_graphs,forecast_arima
+from data_loading.data_flow import export_data_sql,get_data_sql
+
 
 st.markdown('Graphs')
 st.sidebar.markdown('Graphs')
@@ -269,9 +269,15 @@ def main():
 
     data_imported = import_data('csv','sales4.csv')
     data_preproccessed = process_data(data_imported)
-    data_preproccessed = load_data(data_preproccessed)
 
+    data_preproccessed = export_data_sql('csv','sales4.csv')
+    data_preproccessed = get_data_sql()
+
+    print(data_preproccessed.head())
+    data_preproccessed = load_data(data_preproccessed)
     #process:
+
+    print(data_preproccessed.head())
 
     df = apply_filters(data_preproccessed)
     

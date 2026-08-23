@@ -1,8 +1,8 @@
-from src.database.database_create import engine,get_session
+from database.database_create import engine,get_session
 import pandas as pd
 
 from sqlalchemy.orm import Session
-from src.Models.database import sales
+from Models.database import sales
 
 
 def import_from_sql(query: str ='SELECT * FROM  sales') -> pd.DataFrame:

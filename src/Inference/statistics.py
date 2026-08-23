@@ -24,11 +24,6 @@ def mean_ticket_month(data: pd.DataFrame):
     return fig
 
 
-#considerations
-#normality of data: group num distributions and tests significance
-#proprotions tests: group proportions signifcance
-
-
 def determine_the_normality_of_data(data: pd.DataFrame,col: str) -> dict:
 
     analyst = {
@@ -40,7 +35,7 @@ def determine_the_normality_of_data(data: pd.DataFrame,col: str) -> dict:
         }
 
     if len(data) < 50:
-            analyst['test'] = 'Non_Parametric' # small data size
+            analyst['test'] = 'Non_Parametric'
             return analyst
 
 

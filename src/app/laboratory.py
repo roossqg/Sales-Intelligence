@@ -1,13 +1,10 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
 import streamlit as st
 from data_loading.importing import import_data
 from data_loading.processing import process_data
-from app import load_data,apply_filters
-from sqlite3 import connect
+from src.app.app import load_data,apply_filters
 
-import plotly as px
 from statsmodels.tsa.stattools import adfuller
 
 import matplotlib.pyplot as plt
@@ -15,6 +12,8 @@ from statsmodels.graphics.tsaplots import plot_acf,plot_pacf
 from statsmodels.tsa.seasonal import seasonal_decompose
 from Inference.forecasting import forecast_arima,plot_arima_graphs
 from Inference.optimization import product_sale_optimization
+
+from src.data_loading.data_flow import export_data_sql,get_data_sql
 
 st.markdown('Forecast and Optimization')
 st.sidebar.markdown('Forecast and Optimization')
@@ -26,6 +25,10 @@ def main():
 
     df = import_data('csv','sales4.csv')
     df = process_data(df)
+
+    df = export_data_sql('csv','sales4.csv')
+    df = get_data_sql()
+
     df = load_data(df)
     df = apply_filters(df)
 
@@ -38,51 +41,49 @@ def main():
         period = 12
         lags = 12
 
-    data = pd.DataFrame({
+    data_fr = pd.DataFrame({
                     'datetime': df[datetime_type],
                     'series': df['revenue'].astype(int)
                 })
         
-    data = data.groupby('datetime',as_index=True)['series'].sum()
-    data.index = pd.to_datetime(data.index)
+    data = data_fr.groupby('datetime',as_index=True)['series'].sum()
+    data_fr.index = pd.to_datetime(data_fr.index)
     plt.clf()
-    st.dataframe(data.head())
+    st.dataframe(data_fr.head())
 
 
-    tab1,tab2,tab3 = st.tabs(['Series Dignostics','Model_selection','Optimization'])
+    tab1,tab2,tab3 = st.tabs(['Series Diagnostics','Model Selection and Forecast','Optimization'])
 
     with tab1:
-
-        #st.dataframe(data)
 
         col1,col2,col3 = st.columns(3)
 
 
         with col1:
             fig1,ax1 = plt.subplots()
-            ax1.plot(data,color='red',label='data')
+            ax1.plot(data_fr,color='red',label='data')
             st.pyplot(fig1)
             
 
         #ar,ma,armax
         with col2:
             fig2,ax2 = plt.subplots()
-            plot_acf(data,lags=lags,alpha=0.05,ax=ax2)
+            plot_acf(data_fr,lags=lags,alpha=0.05,ax=ax2)
             st.pyplot(fig2)
 
         with col3:
             fig3,ax3 = plt.subplots()
-            plot_pacf(data,lags=lags,alpha=0.05,ax=ax3)
+            plot_pacf(data_fr,lags=lags,alpha=0.05,ax=ax3)
             st.pyplot(fig3)
 
         fig4 , ax4 = plt.subplots()
-        sea = seasonal_decompose(data,period=period)
+        sea = seasonal_decompose(data_fr,period=period)
         fig_sea = sea.plot()
         st.pyplot(fig_sea)
 
     with tab2:
 
-        test = adfuller(data)
+        test = adfuller(data_fr)
         st.metric('AdFuller Test p_value: ', test[1])
         
 
@@ -93,32 +94,25 @@ def main():
         model = (ar,diff,ma)
         steps = st.number_input(label='steps',value=10,key='step')
 
-        results = forecast_arima(data,steps,model,p='d')
+        results = forecast_arima(data_fr,steps,model,p='d')
 
         fig = results['figs']
         st.pyplot(fig)
 
     with tab3:
-        data_op = import_data('csv','sales4.csv')
-        data_op = process_data(data_op)
-        data_op = load_data(data_op)
 
-        data = df.groupby('product_name',as_index=False).agg(
+        data_op = df.groupby('product_name',as_index=False).agg(
             price = ('price','mean'))
 
-        prices = {data.loc[i,'product_name']: float(data.loc[i,'price']) for i in data.index}
-        #costs = {data.loc[i,'product_name']: float(data['price'].mean()) for i in data.index}
-        #capacity_weight = {data.loc[i,'product_name']: 10 for i in data.index}
-        #total_capacity =  {data.loc[i,'product_name']: 500 for i in data.index}
+        prices = {data_op.loc[i,'product_name']: float(data_op.loc[i,'price']) for i in data_op.index}
 
-        cost1 = data['price'].mean()
+        cost1 = df['price'].mean()
         costs = {}
         capacity_weight = {}
         total_capacity = {}
 
         products = df['product_name'].unique()
-        #cols = st.columns(len(products))
-        
+    
 
         with st.expander('Product params'):
             for product in products:
@@ -133,7 +127,7 @@ def main():
         
         budget = 50000
 
-        results = product_sale_optimization(data,prices,costs,capacity_weight,total_capacity,budget)
+        results = product_sale_optimization(data_op,prices,costs,capacity_weight,total_capacity,budget)
 
         st.header('Results')
 
@@ -153,11 +147,7 @@ def main():
         with col4:
             st.bar_chart(datag.set_index('product')['quantity'])
 
-        #with col5:
-           # px.pie
             
-
-
 
 if __name__ == "__main__":
     main()
