@@ -13,7 +13,7 @@ from statsmodels.tsa.stattools import adfuller
 import matplotlib.pyplot as plt
 from statsmodels.graphics.tsaplots import plot_acf,plot_pacf
 from statsmodels.tsa.seasonal import seasonal_decompose
-from Inference.forecasting import forecast_arima
+from Inference.forecasting import forecast_arima,plot_arima_graphs
 from Inference.optimization import product_sale_optimization
 
 st.markdown('Forecast and Optimization')
@@ -56,6 +56,7 @@ def main():
         #st.dataframe(data)
 
         col1,col2,col3 = st.columns(3)
+
 
         with col1:
             fig1,ax1 = plt.subplots()

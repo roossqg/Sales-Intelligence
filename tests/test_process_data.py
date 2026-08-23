@@ -22,6 +22,7 @@ def test_process_data(create_clean_data: pd.DataFrame,data_format_path):
 
     assert type(data_processed) == pd.DataFrame
     assert len(data_processed.columns) == 12
+    assert data_processed.isna().sum().sum() == 0
 
 
 def test_export_to_sql(data_format_path):

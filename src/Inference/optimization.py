@@ -1,7 +1,7 @@
 import pulp
 import pandas as pd
-from data_loading.importing import import_data
-from data_loading.processing import process_data
+from src.data_loading.importing import import_data
+from src.data_loading.processing import process_data
 
 data_i = import_data('csv','sales4.csv')
 data_p = process_data(data_i)
@@ -26,14 +26,12 @@ def product_sale_optimization(data,prices,costs,capacity_weight,total_capacity,b
     #data:
     products = data['product_name'].unique()
 
-    data = data_i.groupby('product_name',as_index=False).agg(
-    price = ('price','mean')
-)
+
 
     #total_capacity = 15000
 
     # price x quat
-    model = pulp.LpProblem('profit maximization',pulp.LpMaximize)
+    model = pulp.LpProblem('profit_maximization',pulp.LpMaximize)
 
     quantity = pulp.LpVariable.dicts('quantity',products,lowBound=0,upBound=None,cat='Integer')
     

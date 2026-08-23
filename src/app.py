@@ -1,8 +1,8 @@
 import pandas as pd
 import plotly.express as px
 import streamlit as st
-from data_loading.importing import import_data
-from data_loading.processing import process_data
+from src.data_loading.importing import import_data
+from src.data_loading.processing import process_data
 from sqlite3 import connect
 
 #from Inference.forecasting import plot_arima_graphs,forecast_arima

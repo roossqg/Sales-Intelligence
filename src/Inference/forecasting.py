@@ -19,21 +19,9 @@ matplotlib.use('Agg')
 
 #plot eavluations for confidence
 
-def plot_arima_graphs(data,col,time_period):
-    #plot series of respective time series
-
-    data = pd.DataFrame({
-        'datetime': data[time_period],
-        'series': data[col]
-    })
-
-    data = data.set_index('datetime')
-
+def plot_arima_graphs(data):
     fig1, ax1 = plt.subplots()
-
     ax1.plot(data,color='red',label='data')
-    st.pyplot(fig1)
-    
 
     #ar,ma,armax
     fig2,ax2 = plt.subplots()
@@ -44,8 +32,10 @@ def plot_arima_graphs(data,col,time_period):
     plot_pacf(data,lags=20,alpha=0.05,ax=ax3)
 
 
-    #sea = seasonal_decompose(x=data[col])
-    #sea.plot()
+    sea = seasonal_decompose(x=data,period=2)
+    fig4 = sea.plot()
+
+    return {'figs': [fig1,fig2,fig3,fig4]}
 
 
 def forecast_arima(data,steps=20,model: tuple = (1,0,1),p='d'):

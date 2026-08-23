@@ -15,6 +15,9 @@ t_data:
 
 t_fr:
 	poetry run pytest tests/test_forecast.py
+t_op:
+	poetry run pytest tests/tests_optimization.py
+
 
 dt1:
 	poetry run streamlit run /home/augusto2/Sales_inteligence_dh-api/app_copy.py

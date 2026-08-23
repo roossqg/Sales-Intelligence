@@ -20,53 +20,37 @@ def mean_ticket_month(data: pd.DataFrame):
     data = pd.DataFrame({'Month':total_revenue.index,'Revenue':list(total_revenue)})
 
     fig = px.line(data,x='Month',y='Revenue',title='Average Ticket Price per Month')
-    fig.show()
+
+    return fig
 
 
 #considerations
 #normality of data: group num distributions and tests significance
 #proprotions tests: group proportions signifcance
 
-def boostrap_test(data: pd.DataFrame,col: str):
-    #simple sampling
-
-    size = len(data)
-    boot_means = []
-
-    for i in range(5000):
-        boot_means.append(
-            np.mean(data.sample(frac=0.3,replace=True)[col])
-        )
-
-    mean_sample = np.mean(boot_means)
-    std_sample = np.std(boot_means,ddof=1)
-
-    cohen_d = (mean_sample - np.mean(data[col])) / std_sample
-
-    return cohen_d
-
 
 def determine_the_normality_of_data(data: pd.DataFrame,col: str) -> dict:
 
-    appropriate_tests = {'test': ''}
+    analyst = {
+            'skew': skewtest(data[col]).statistic,
+            'shapiro': shapiro(data[col]).pvalue,
+            'kurtosis': kurtosis(data[col]).pvalue,
+            'test':0
+            
+        }
 
     if len(data) < 50:
-            appropriate_tests['test'] = 'Non_Parametric' # small data size
-            return appropriate_tests
+            analyst['test'] = 'Non_Parametric' # small data size
+            return analyst
 
-    analyst = {
-        'skew': skewtest(data[col]).statistic,
-        'shapiro': shapiro(data[col]).pvalue,
-        'kurtosis': kurtosis(data[col]).pvalue,
-    }
 
     if analyst['skew'] <= 0.5 and analyst['shapiro'] <= 0.05 and analyst['kurtosis'] <= 0.3:
-        appropriate_tests['test'] = 'Parametric'
+        analyst['test'] = 'Parametric'
 
     else:
-        appropriate_tests['test'] = 'Non_Parametric'
+        analyst['test'] = 'Non_Parametric'
 
-    return appropriate_tests
+    return analyst
 
 
 def chi_square_tests(data: pd.DataFrame,col: str) -> float:
@@ -109,7 +93,7 @@ def prob_sell_specific_product_sector(data: pd.DataFrame,n_product: int ,n_produ
 
     bin_dist = binom.cdf(n_product,prob_product,size=n_products)
 
-    return data
+    return bin_dist
 
 
 #def age_cat_test_group
