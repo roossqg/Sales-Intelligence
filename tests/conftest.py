@@ -1,8 +1,9 @@
 import pytest
 import pandas as pd
-from src.Models.database import Base
-from sqlalchemy import create_engine
-from src.database.database_create import get_session
+
+from src.data_loading.importing import import_data
+from src.data_loading.processing import process_data
+from src.app.app import load_data
 
 @pytest.fixture
 def create_clean_data():
@@ -24,4 +25,14 @@ def create_clean_data():
 @pytest.fixture
 def data_format_path():
     return ['csv','sales4.csv']
+
+
+@pytest.fixture
+def data_full(data_format_path):
+
+    data_imp = import_data(data_format_path[0],data_format_path[1])
+    data_pr = process_data(data_imp)
+    data = load_data(data_pr)
+
+    return data
 

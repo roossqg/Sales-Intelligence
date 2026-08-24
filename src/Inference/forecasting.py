@@ -4,30 +4,50 @@ import matplotlib.pyplot as plt
 from statsmodels.graphics.tsaplots import plot_acf,plot_pacf
 import pandas as pd
 
+from statsmodels.tsa.stattools import adfuller
 
 import matplotlib
 matplotlib.use('Agg')
 
 
-def plot_arima_graphs(data):
+def plot_arima_graphs(data,lags,period,datetime_type):
+
+    data = pd.DataFrame({
+                            'datetime': data[datetime_type],
+                            'series': data['revenue'].astype(int)
+                        })
+                
+    data = data.groupby('datetime',as_index=True)['series'].sum()
+    data.index = pd.to_datetime(data.index)
+
     fig1, ax1 = plt.subplots()
     ax1.plot(data,color='red',label='data')
 
     fig2,ax2 = plt.subplots()
-    plot_acf(data,lags=20,alpha=0.05,ax=ax2)
+    plot_acf(data,lags=lags,alpha=0.05,ax=ax2)
     
 
     fig3,ax3 = plt.subplots()
-    plot_pacf(data,lags=20,alpha=0.05,ax=ax3)
+    plot_pacf(data,lags=lags,alpha=0.05,ax=ax3)
 
 
-    sea = seasonal_decompose(x=data,period=2)
+    sea = seasonal_decompose(x=data,period=period)
     fig4 = sea.plot()
 
-    return {'figs': [fig1,fig2,fig3,fig4]}
+    adfuller_test = adfuller(data)
+
+    return {'figs': [fig1,fig2,fig3,fig4],'test': adfuller_test}
 
 
-def forecast_arima(data,steps=20,model: tuple = (1,0,1),p='d'):
+def forecast_arima(data,datetime_type,steps=20,model: tuple = (1,0,1)):
+
+    data = pd.DataFrame({
+                                'datetime': data[datetime_type],
+                                'series': data['revenue'].astype(int)
+                            })
+                    
+    data = data.groupby('datetime',as_index=True)['series'].sum()
+    data.index = pd.to_datetime(data.index)
 
     #predicts
     if model[1] != 0:

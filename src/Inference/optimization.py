@@ -1,7 +1,12 @@
 import pulp
 
 
-def product_sale_optimization(data,prices,costs,capacity_weight,total_capacity,budget): 
+def product_sale_optimization(data,costs,capacity_weight,total_capacity,budget): 
+
+    data_op = data.groupby('product_name',as_index=False).agg(
+                price = ('price','mean'))
+    
+    prices = {data_op.loc[i,'product_name']: float(data_op.loc[i,'price']) for i in data_op.index}
 
     #data:
     products = data['product_name'].unique()
