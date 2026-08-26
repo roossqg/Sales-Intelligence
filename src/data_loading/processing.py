@@ -1,9 +1,6 @@
 import pandas as pd
 import numpy as np
 
-from sklearn.ensemble import RandomForestClassifier
-
-
 def datetime_numbers(data: pd.DataFrame,target_col: str = 'datetime') -> pd.DataFrame:
     '''create num columns from datetime to use in random forest'''
 

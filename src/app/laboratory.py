@@ -31,14 +31,18 @@ def main():
 
     datetime_type = st.sidebar.selectbox('Select datetime metric: ',['month','datetime'])
     if datetime_type == 'datetime':
+        p = 'D'
         lags = 7
         period = 7
     else: 
         period = 12
+        p = 'MS'
         lags = 12
 
     plt.clf()
-    st.dataframe(df.head())
+    df1 = df.groupby(datetime_type)['revenue'].sum()
+
+    st.dataframe(df1.head(20))
 
 
     tab1,tab2,tab3 = st.tabs(['Series Diagnostics','Model Selection and Forecast','Optimization'])

@@ -29,7 +29,7 @@ def determine_the_normality_of_data(data: pd.DataFrame,col: str) -> dict:
     analyst = {
             'skew': skewtest(data[col]).statistic,
             'shapiro': shapiro(data[col]).pvalue,
-            'kurtosis': kurtosis(data[col]).pvalue,
+            'kurtosis': kurtosis(data[col]),
             'test':0
             
         }

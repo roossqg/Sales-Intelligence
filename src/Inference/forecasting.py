@@ -12,6 +12,7 @@ matplotlib.use('Agg')
 
 def plot_arima_graphs(data,lags,period,datetime_type):
 
+
     data = pd.DataFrame({
                             'datetime': data[datetime_type],
                             'series': data['revenue'].astype(int)
@@ -19,6 +20,7 @@ def plot_arima_graphs(data,lags,period,datetime_type):
                 
     data = data.groupby('datetime',as_index=True)['series'].sum()
     data.index = pd.to_datetime(data.index)
+
 
     fig1, ax1 = plt.subplots()
     ax1.plot(data,color='red',label='data')
@@ -40,6 +42,7 @@ def plot_arima_graphs(data,lags,period,datetime_type):
 
 
 def forecast_arima(data,datetime_type,steps=20,model: tuple = (1,0,1)):
+
 
     data = pd.DataFrame({
                                 'datetime': data[datetime_type],
