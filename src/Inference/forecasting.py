@@ -10,7 +10,7 @@ import matplotlib
 matplotlib.use('Agg')
 
 
-def plot_arima_graphs(data,lags,period,datetime_type):
+def plot_arima_graphs(data: pd.DataFrame,lags: int,period: int,datetime_type: str) -> dict:
 
 
     data = pd.DataFrame({
@@ -41,7 +41,7 @@ def plot_arima_graphs(data,lags,period,datetime_type):
     return {'figs': [fig1,fig2,fig3,fig4],'test': adfuller_test}
 
 
-def forecast_arima(data,datetime_type,steps=20,model: tuple = (1,0,1)):
+def forecast_arima(data: pd.DataFrame,datetime_type: str,steps: int = 20,model: tuple = (1,0,1)) -> dict:
 
 
     data = pd.DataFrame({
@@ -114,6 +114,9 @@ def forecast_arima(data,datetime_type,steps=20,model: tuple = (1,0,1)):
         label='Conf Int'
         )
     plt.legend()
+
+    
+    fig3 = model.plot_diagnostics()
     plt.show()
 
-    return {'figs': fig2,'summary':summary,'metrics':metrics}
+    return {'figs': [fig3,fig2],'summary':summary,'metrics':metrics}

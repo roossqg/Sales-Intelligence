@@ -1,7 +1,9 @@
 import pulp
+import pandas as pd
 
 
-def product_sale_optimization(data,costs,capacity_weight,total_capacity,budget): 
+def product_sale_optimization(data: pd.DataFrame,costs: dict,
+                        capacity_weight: dict,total_capacity: dict ,budget: int) -> dict: 
 
     data_op = data.groupby('product_name',as_index=False).agg(
                 price = ('price','mean'))

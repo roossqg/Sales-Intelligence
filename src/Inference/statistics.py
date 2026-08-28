@@ -7,6 +7,7 @@ from data_loading.importing import import_data
 from data_loading.processing import process_data
 
 import plotly.express as px
+from plotly.graph_objects import Figure
 
 data_im = import_data('csv','sales.csv')
 data_cl = process_data(data_im)
@@ -14,7 +15,7 @@ data_cl = process_data(data_im)
 print(len(data_cl.columns))
 
 
-def mean_ticket_month(data: pd.DataFrame):
+def mean_ticket_month(data: pd.DataFrame)-> Figure:
 
     total_revenue = data.groupby('Month')['price'].agg('sum') / data.groupby('Month')['client_id'].agg('count')
     data = pd.DataFrame({'Month':total_revenue.index,'Revenue':list(total_revenue)})
@@ -26,11 +27,14 @@ def mean_ticket_month(data: pd.DataFrame):
 
 def determine_the_normality_of_data(data: pd.DataFrame,col: str) -> dict:
 
+    fig = px.histogram(data,col)
+
     analyst = {
             'skew': skewtest(data[col]).statistic,
             'shapiro': shapiro(data[col]).pvalue,
             'kurtosis': kurtosis(data[col]),
-            'test':0
+            'test':0,
+            'fig': fig
             
         }
 
@@ -56,10 +60,10 @@ def chi_square_tests(data: pd.DataFrame,col: str) -> float:
 
     chi_stat,pval = chisquare(f_exp=expected,f_obs=observed)
 
-    return pval
+    return chi_stat,pval
 
 
-def prob_quantity_per_time(data: pd.DataFrame,quantity: int,time: datetime) -> float:
+def prob_quantity_per_time(data: pd.DataFrame,time: datetime) -> float:
 
     mean_solds_time =  data.groupby(time)['quantity'].agg('sum').mean()
     prob_qtd_time = poisson.cdf(range,mean_solds_time)

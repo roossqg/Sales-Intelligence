@@ -187,7 +187,7 @@ def ghp_dist_clients_by_age(df: pd.DataFrame):
     return fig
 
 
-def ghp_seazonality(df: pd.DataFrame,time):
+def ghp_seazonality(df: pd.DataFrame,time: str):
     days_dict = {
         "Monday": "Monday", "Tuesday": "Tuesday", "Wednesday": "Wednesday",
         "Thursday": "Thursday", "Friday": "Friday", "Saturday": "Saturday", "Sunday": "Sunday",
@@ -336,29 +336,6 @@ def main():
 
         st.plotly_chart(ghp_seazonality(df,time), use_container_width=True)
 
-
-
-        data = pd.DataFrame({
-                'datetime': df['month'],
-                'series': df['revenue']
-            })
-        data = data.set_index('datetime')
-
-        import matplotlib.pyplot as plt
-        from statsmodels.graphics.tsaplots import plot_acf,plot_pacf
-
-        fig1,ax1 = plt.subplots()
-        ax1.plot(data,color='red',label='data')
-        st.pyplot(fig1)
-
-        #ar,ma,armax
-        fig2,ax2 = plt.subplots()
-        plot_acf(data,lags=20,alpha=0.05,ax=ax2)
-        st.pyplot(fig2)
-
-        fig3,ax3 = plt.subplots()
-        plot_pacf(data,lags=20,alpha=0.05,ax=ax3)
-        st.pyplot(fig3)
  
 if __name__ == "__main__":
     main()

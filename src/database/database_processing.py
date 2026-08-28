@@ -1,7 +1,6 @@
 from database.database_create import engine,get_session
 import pandas as pd
 
-from sqlalchemy.orm import Session
 from Models.database import sales
 
 

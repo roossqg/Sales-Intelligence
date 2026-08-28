@@ -1,7 +1,9 @@
-# Sales Intelligence - Beta 1.0
+# Sales Intelligence - Beta 1.1
 
 ## Overview
 Data web application that **imports**,**process** and **analyzes** your sales data from differents sources and provides an dashboard to track typical sale metrics like **Time Series Revenue** and **Sold Stock**.
+
+Also,its possible make inferences and understand data better using **Statistical Analyses and Tests**,**Forecatsing** and **Optimization**.
 
 ## Tech
 - **Python**: data processing and analysis
@@ -37,7 +39,7 @@ The importing pipeline automatically converts the data which you passed, to a **
 | Column | Missing values | Incosistent Categories |
 | :---: | :---: | ---:  |
 | client_id | keep null | |
-| age | input mean  | |
+| age | mean  | |
 | product_name | keep null | remove incosistent chars,lower text
 | price | mean | |
 | quantity | mean | |

@@ -4,7 +4,7 @@ import pandas as pd
 from database.database_processing import export_to_sql
 from database.database_create import engine
 
-def export_data_sql(file_type,file_path):
+def export_data_sql(file_type: str,file_path: str) -> str:
 
     data_import = import_data(file_type,file_path)
     data_process = process_data(data_import)
@@ -15,7 +15,7 @@ def export_data_sql(file_type,file_path):
     return message
 
 
-def get_data_sql(engine=engine):
+def get_data_sql(engine=engine) -> pd.DataFrame:
 
     df = pd.read_sql('SELECT * FROM Sales_data;',engine)
     return df
